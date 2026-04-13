@@ -2,8 +2,6 @@
 
 ## manufacturing-data-quality-platform
 
-> fetching dataset...
+> we got the dataset
 
----
-
-lastly, back to roasting beans ☕
+> now cooking 🔥
