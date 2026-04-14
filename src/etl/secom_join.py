@@ -8,7 +8,7 @@ from sqlalchemy import text
 from src.db.connection import get_engine
 
 
-def build_production_entities(
+def build_secom_entities(
     schema: str = "raw",
     connection_string: str | None = None,
 ) -> pd.DataFrame:
@@ -20,9 +20,17 @@ def build_production_entities(
 
     Returns:
         DataFrame with entity_id, test_timestamp, yield_label, pass_fail,
-        and all 590 measurement features.
+        and all measurement features discovered from the source table.
     """
     engine = get_engine(connection_string)
+    dialect = engine.dialect.name
+
+    measurements_table = (
+        f"{schema}.secom_measurements" if dialect != "sqlite" else "secom_measurements"
+    )
+    labels_table = (
+        f"{schema}.secom_labels" if dialect != "sqlite" else "secom_labels"
+    )
 
     query = text(
         f"""
@@ -31,8 +39,8 @@ def build_production_entities(
             l.yield_label,
             l.test_timestamp,
             l.pass_fail
-        FROM {schema}.secom_measurements AS m
-        INNER JOIN {schema}.secom_labels AS l
+        FROM {measurements_table} AS m
+        INNER JOIN {labels_table} AS l
             ON m.entity_id = l.entity_id
         ORDER BY l.test_timestamp
         """
@@ -42,16 +50,16 @@ def build_production_entities(
     return df
 
 
-def save_production_entities(
+def save_secom_entities(
     df: pd.DataFrame,
     target_schema: str = "staging",
-    target_table: str = "production_entities",
+    target_table: str = "secom_entities",
     connection_string: str | None = None,
 ) -> int:
-    """Persist the joined production entities into the staging layer.
+    """Persist the joined SECOM entities into the staging layer.
 
     Args:
-        df: DataFrame from build_production_entities()
+        df: DataFrame from build_secom_entities()
         target_schema: Target schema for the table
         target_table: Target table name
         connection_string: Optional explicit DB connection string
