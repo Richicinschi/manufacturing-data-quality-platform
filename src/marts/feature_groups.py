@@ -51,8 +51,14 @@ def build_feature_groups(
     top_set = set(top_features)
 
     top_count = len(catalog[catalog["feature_name"].isin(top_set)])
-    review = catalog[catalog["recommended_action"] == "review_high_missing"]
-    keep = catalog[(catalog["recommended_action"] == "keep") & (~catalog["feature_name"].isin(top_set))]
+    review = catalog[
+        (catalog["recommended_action"] == "review_high_missing")
+        & (~catalog["feature_name"].isin(top_set))
+    ]
+    keep = catalog[
+        (catalog["recommended_action"] == "keep")
+        & (~catalog["feature_name"].isin(top_set))
+    ]
     constant = catalog[catalog["recommended_action"] == "drop_constant"]
     all_null = catalog[catalog["recommended_action"] == "drop_all_null"]
 

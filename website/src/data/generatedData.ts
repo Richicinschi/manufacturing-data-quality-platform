@@ -238,12 +238,7 @@ export const MART_TABLES = [
     file: "src/marts/daily_failure_rollup.py",
     columns: ["event_date", "entity_count", "fail_count", "fail_rate", "rolling_7d_fail_rate"],
   },
-  {
-    name: "mart.feature_coverage_summary",
-    description: "High-level coverage summary from the feature catalog",
-    file: "src/marts/feature_coverage_summary.py",
-    columns: ["metric", "count", "description"],
-  },
+
   {
     name: "mart.feature_groups",
     description: "Feature buckets for priority review",

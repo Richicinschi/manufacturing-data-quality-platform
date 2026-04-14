@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ElementType } from 'react'
 import {
   BarChart,
@@ -55,11 +55,14 @@ const groupTextColors: Record<string, string> = {
   excluded_all_null: 'text-pink',
 }
 
+const PAGE_SIZE = 25
+
 export default function DataQualityPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
   const [highMissingOnly, setHighMissingOnly] = useState(false)
   const [constantOnly, setConstantOnly] = useState(false)
+  const [currentPage, setCurrentPage] = useState(1)
 
   const filteredFeatures = useMemo(() => {
     return FEATURE_CATALOG.filter((feature) => {
@@ -70,6 +73,16 @@ export default function DataQualityPage() {
       return matchesSearch && matchesFilter && matchesHighMissing && matchesConstant
     })
   }, [activeFilter, searchQuery, highMissingOnly, constantOnly])
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeFilter, searchQuery, highMissingOnly, constantOnly])
+
+  const totalPages = Math.max(1, Math.ceil(filteredFeatures.length / PAGE_SIZE))
+  const paginatedFeatures = filteredFeatures.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
+  const startIndex = (currentPage - 1) * PAGE_SIZE + 1
+  const endIndex = Math.min(currentPage * PAGE_SIZE, filteredFeatures.length)
 
   const topMissingFeatures = FEATURE_CATALOG
     .slice()
@@ -402,7 +415,7 @@ export default function DataQualityPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredFeatures.map((feature) => {
+                  {paginatedFeatures.map((feature) => {
                     const typedAction = feature.action as FeatureActionKey
                     const Icon = actionIcons[typedAction]
                     const label = FEATURE_ACTIONS[typedAction]?.label ?? typedAction
@@ -459,8 +472,41 @@ export default function DataQualityPage() {
               </table>
             </div>
           </div>
-          <div className="mt-4 text-sm text-comment">
-            Showing {filteredFeatures.length} of {FEATURE_CATALOG.length} exported features
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+            <div className="text-sm text-comment">
+              Showing {startIndex}-{endIndex} of {filteredFeatures.length} exported features
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-2 rounded-lg text-sm font-medium bg-comment/10 text-white/70 hover:text-white hover:bg-comment/20 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 rounded-lg text-sm font-medium ${
+                      currentPage === page
+                        ? 'bg-yellow text-bg'
+                        : 'bg-comment/10 text-white/70 hover:text-white hover:bg-comment/20'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-2 rounded-lg text-sm font-medium bg-comment/10 text-white/70 hover:text-white hover:bg-comment/20 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
           </div>
         </section>
       </div>

@@ -23,6 +23,7 @@ from src.marts.top_signal_profiles import build_top_signal_profiles
 from src.marts.feature_failure_relationship import build_feature_failure_relationship
 from src.marts.daily_failure_rollup import build_daily_failure_rollup
 from src.marts.feature_priority_index import build_feature_priority_index
+from src.marts.feature_groups import build_feature_groups
 
 
 @pytest.fixture(scope="session")
@@ -385,6 +386,50 @@ def test_feature_priority_index_buckets(engine, source_schema, db_connection_str
         assert row["priority_bucket"] == expected_bucket, (
             f"Feature {row['feature_name']} expected {expected_bucket}, got {row['priority_bucket']}"
         )
+
+
+def test_feature_groups_mart_created(engine, source_schema, db_connection_string):
+    build_top_signal_fail_separation(
+        source_schema=source_schema,
+        source_table="secom_entities",
+        catalog_schema=source_schema,
+        catalog_table="feature_catalog",
+        target_schema="mart",
+        target_table="top_signal_fail_separation",
+        connection_string=db_connection_string,
+    )
+
+    build_feature_failure_relationship(
+        source_schema=source_schema,
+        source_table="secom_entities",
+        catalog_schema=source_schema,
+        catalog_table="feature_catalog",
+        target_schema="mart",
+        target_table="feature_failure_relationship",
+        connection_string=db_connection_string,
+    )
+
+    groups = build_feature_groups(
+        top_n=20,
+        catalog_schema=source_schema,
+        catalog_table="feature_catalog",
+        ranking_schema="mart",
+        ranking_table="feature_failure_relationship",
+        target_schema="mart",
+        target_table="feature_groups_test",
+        connection_string=db_connection_string,
+    )
+
+    assert len(groups) == 5
+    expected_groups = {
+        "top_separators",
+        "review_high_missing",
+        "standard_keep",
+        "excluded_constant",
+        "excluded_all_null",
+    }
+    assert set(groups["group_name"]) == expected_groups
+    assert groups["count"].sum() == 590
 
 
 if __name__ == "__main__":

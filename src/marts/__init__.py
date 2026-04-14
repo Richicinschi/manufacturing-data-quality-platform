@@ -3,7 +3,7 @@
 from src.marts.daily_failure_rollup import build_daily_failure_rollup
 from src.marts.daily_yield_trend import build_daily_yield_trend
 from src.marts.feature_action_summary import build_feature_action_summary
-from src.marts.feature_coverage_summary import build_feature_coverage_summary
+
 from src.marts.feature_failure_relationship import build_feature_failure_relationship
 from src.marts.feature_groups import build_feature_groups
 from src.marts.feature_missingness import build_feature_missingness
@@ -17,7 +17,6 @@ __all__ = [
     "build_daily_failure_rollup",
     "build_daily_yield_trend",
     "build_feature_action_summary",
-    "build_feature_coverage_summary",
     "build_feature_failure_relationship",
     "build_feature_groups",
     "build_feature_missingness",

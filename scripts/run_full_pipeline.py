@@ -58,6 +58,7 @@ def main() -> None:
         "mart.feature_priority_index",
         "mart.daily_yield_trend",
         "mart.feature_action_summary",
+        "mart.feature_groups",
     ])
 
     print()

@@ -23,7 +23,7 @@ Across all 590 signals the overall missingness rate is roughly **4.5%**.
 
 - **28 features** are high-missing (≥ 50% null values)
 - **116 features** are constant (zero variance, all identical values)
-- A handful of features are entirely null and should be dropped outright
+- **0 features** are entirely null in the current dataset
 
 These issues are typical of real-world industrial sensor data where instruments go offline, are recalibrated, or are not relevant to every process step.
 

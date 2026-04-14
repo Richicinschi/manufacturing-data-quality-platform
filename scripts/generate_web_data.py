@@ -75,7 +75,7 @@ def export_to_json() -> Path:
         feature_groups_buckets.append({
             "bucket_name": bucket_name,
             "feature_count": len(features),
-            "features": features[:50],
+            "features": features,
         })
 
     keep_review_buckets = {"standard_keep", "review_high_missing", "top_separator"}

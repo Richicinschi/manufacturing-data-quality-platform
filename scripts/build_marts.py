@@ -12,6 +12,7 @@ from src.marts import (
     build_daily_yield_trend,
     build_feature_action_summary,
     build_feature_failure_relationship,
+    build_feature_groups,
     build_feature_missingness,
     build_feature_priority_index,
     build_label_distribution,
@@ -61,6 +62,10 @@ def main() -> None:
     print("Building mart.feature_action_summary...")
     build_feature_action_summary()
     print("  Built mart.feature_action_summary")
+
+    print("Building mart.feature_groups...")
+    build_feature_groups()
+    print("  Built mart.feature_groups")
 
     print("Mart build complete.")
 
