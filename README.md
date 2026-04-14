@@ -68,3 +68,8 @@ That file is built from the warehouse marts and currently contains:
 - `daily_trend`
 
 If the generated JSON is missing, the website build should fail clearly rather than silently falling back to placeholder content.
+
+## Documentation
+
+- `docs/secom_findings.md` — analytical findings from the SECOM dataset
+- `docs/secom_data_dictionary.md` — warehouse and export data dictionary

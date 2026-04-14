@@ -11,19 +11,19 @@ import {
   ComposedChart,
   Line,
 } from 'recharts'
-import { Calendar, TrendingDown, Activity, Clock } from 'lucide-react'
-import { DAILY_TREND, DATASET_METRICS } from '../data/generatedData'
+import { Calendar, TrendingDown, Activity, Clock, Info } from 'lucide-react'
+import { DAILY_FAILURE_SUMMARY, DATASET_METRICS } from '../data/generatedData'
 
 export default function TimeTrendsPage() {
   const stats = useMemo(() => {
-    const totalDays = DAILY_TREND.length
-    const totalEntities = DAILY_TREND.reduce((sum, row) => sum + row.entityCount, 0)
+    const totalDays = DAILY_FAILURE_SUMMARY.length
+    const totalEntities = DAILY_FAILURE_SUMMARY.reduce((sum, row) => sum + row.entityCount, 0)
     const avgDailyVolume = totalDays ? Math.round(totalEntities / totalDays) : 0
     const avgFailRate = totalDays
-      ? (DAILY_TREND.reduce((sum, row) => sum + row.failRate, 0) / totalDays).toFixed(2)
+      ? (DAILY_FAILURE_SUMMARY.reduce((sum, row) => sum + row.failRate, 0) / totalDays).toFixed(2)
       : '0.00'
-    const maxDailyVolume = totalDays ? Math.max(...DAILY_TREND.map((row) => row.entityCount)) : 0
-    const minDailyVolume = totalDays ? Math.min(...DAILY_TREND.map((row) => row.entityCount)) : 0
+    const maxDailyVolume = totalDays ? Math.max(...DAILY_FAILURE_SUMMARY.map((row) => row.entityCount)) : 0
+    const minDailyVolume = totalDays ? Math.min(...DAILY_FAILURE_SUMMARY.map((row) => row.entityCount)) : 0
 
     return {
       totalDays,
@@ -34,7 +34,16 @@ export default function TimeTrendsPage() {
     }
   }, [])
 
-  if (DAILY_TREND.length === 0) {
+  const chartData = useMemo(
+    () =>
+      DAILY_FAILURE_SUMMARY.map((row) => ({
+        ...row,
+        passCount: row.entityCount - row.failCount,
+      })),
+    [],
+  )
+
+  if (DAILY_FAILURE_SUMMARY.length === 0) {
     return (
       <div className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -104,6 +113,15 @@ export default function TimeTrendsPage() {
           </div>
         </div>
 
+        <div className="mb-8 bg-yellow/10 rounded-lg p-4 border border-yellow/30 flex items-start gap-3">
+          <Info className="w-5 h-5 text-yellow mt-0.5" />
+          <div>
+            <p className="text-white/80 text-sm">
+              The observed period spans <span className="font-mono text-white">{stats.totalDays} days</span> with a strong class imbalance: only <span className="font-mono text-white">{DATASET_METRICS.failPct}%</span> of entities failed. The rolling 7-day fail rate smooths daily noise and reflects the underlying imbalance without inventing operational causes.
+            </p>
+          </div>
+        </div>
+
         <div className="grid lg:grid-cols-2 gap-8">
           <div className="bg-comment/5 rounded-lg p-6 border border-comment/30">
             <div className="flex items-center gap-3 mb-6">
@@ -111,13 +129,13 @@ export default function TimeTrendsPage() {
                 <TrendingDown className="w-5 h-5 text-pink" />
               </div>
               <div>
-                <h2 className="text-lg font-bold text-white">Daily Fail Rate</h2>
-                <p className="text-white/50 text-sm">Percentage of failed entities per day</p>
+                <h2 className="text-lg font-bold text-white">Fail Rate Trend</h2>
+                <p className="text-white/50 text-sm">Daily fail rate with 7-day rolling average</p>
               </div>
             </div>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={DAILY_TREND}>
+                <ComposedChart data={chartData}>
                   <defs>
                     <linearGradient id="failRateGradient" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#b05279" stopOpacity={0.3} />
@@ -141,22 +159,25 @@ export default function TimeTrendsPage() {
                       border: '1px solid #797979',
                       borderRadius: '4px',
                     }}
-                    formatter={(value: number) => [`${value.toFixed(2)}%`, 'Fail Rate']}
+                    formatter={(value: number, name: string) => [`${value.toFixed(2)}%`, name]}
                     labelFormatter={(label) => `Date: ${label}`}
                   />
                   <Area
                     type="monotone"
-                    dataKey="failRate"
+                    dataKey="rolling7dFailRate"
                     stroke="#b05279"
                     strokeWidth={2}
                     fill="url(#failRateGradient)"
+                    name="Rolling 7-day Fail Rate"
                   />
                   <Line
                     type="monotone"
                     dataKey="failRate"
                     stroke="#b05279"
-                    strokeWidth={2}
-                    dot={{ fill: '#b05279', strokeWidth: 0, r: 2 }}
+                    strokeWidth={1}
+                    strokeOpacity={0.5}
+                    dot={false}
+                    name="Daily Fail Rate"
                   />
                 </ComposedChart>
               </ResponsiveContainer>
@@ -175,7 +196,7 @@ export default function TimeTrendsPage() {
             </div>
             <div className="h-72">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={DAILY_TREND}>
+                <BarChart data={chartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#797979" opacity={0.3} vertical={false} />
                   <XAxis
                     dataKey="date"
@@ -204,7 +225,7 @@ export default function TimeTrendsPage() {
           <h2 className="text-lg font-bold text-white mb-6">Daily Pass/Fail Breakdown</h2>
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={DAILY_TREND}>
+              <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#797979" opacity={0.3} vertical={false} />
                 <XAxis
                   dataKey="date"

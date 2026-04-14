@@ -18,6 +18,7 @@ import {
   REPO_URL,
   KEY_FINDINGS,
   PIPELINE_STAGES,
+  FEATURE_CORRELATION_TO_FAILURE,
 } from '../data/generatedData'
 
 function KPICard({
@@ -102,6 +103,12 @@ export default function LandingPage() {
                 </li>
               </ul>
 
+              <div className="p-4 bg-blue/10 rounded-lg border border-blue/30 mb-8">
+                <p className="text-white/80 text-sm">
+                  <span className="font-medium text-blue">What this project proves:</span> It demonstrates a complete, rerunnable data-warehouse workflow—from raw SECOM manufacturing data through PostgreSQL marts to a React website—showing how feature profiling, effect-size ranking, and daily yield tracking can be automated and published.
+                </p>
+              </div>
+
               <div className="flex flex-wrap gap-4">
                 <Link
                   to="/data-quality"
@@ -179,6 +186,32 @@ export default function LandingPage() {
                 {DATASET_METRICS.dateRange.start} to {DATASET_METRICS.dateRange.end}
               </div>
               <div className="text-xs text-comment uppercase tracking-wider mt-1">Date Range</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-8 bg-green/5 border-b border-comment/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="text-center md:text-left">
+              <p className="text-white/70 text-sm">
+                This website consumes real SECOM outputs exported from the PostgreSQL warehouse via <span className="font-mono text-yellow">scripts/generate_web_data.py</span>.
+              </p>
+            </div>
+            <div className="flex gap-6 text-center">
+              <div>
+                <div className="text-xl font-mono font-bold text-white">{DATASET_METRICS.entityCount.toLocaleString()}</div>
+                <div className="text-xs text-comment">wafers</div>
+              </div>
+              <div>
+                <div className="text-xl font-mono font-bold text-white">{DATASET_METRICS.failPct}%</div>
+                <div className="text-xs text-comment">failure rate</div>
+              </div>
+              <div>
+                <div className="text-xl font-mono font-bold text-white">{FEATURE_CORRELATION_TO_FAILURE.length}</div>
+                <div className="text-xs text-comment">ranked separators</div>
+              </div>
             </div>
           </div>
         </div>

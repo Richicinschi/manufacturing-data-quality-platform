@@ -17,11 +17,12 @@ import {
   ACTION_SUMMARY,
   DATASET_METRICS,
   FEATURE_ACTIONS,
-  FEATURE_MISSINGNESS,
+  FEATURE_CATALOG,
+  FEATURE_GROUPS,
   LABEL_DISTRIBUTION,
 } from '../data/generatedData'
 
-type FilterType = 'all' | 'keep' | 'review' | 'drop'
+type FilterType = 'all' | 'keep' | 'review_high_missing' | 'drop_constant' | 'drop_all_null'
 type FeatureActionKey = keyof typeof FEATURE_ACTIONS
 
 const actionIcons: Record<FeatureActionKey, ElementType> = {
@@ -38,25 +39,63 @@ const actionColors: Record<FeatureActionKey, string> = {
   drop_all_null: 'text-pink bg-pink/20 border-pink/30',
 }
 
+const groupColors: Record<string, string> = {
+  top_separators: 'border-green/30 bg-green/10',
+  review_high_missing: 'border-yellow/30 bg-yellow/10',
+  standard_keep: 'border-blue/30 bg-blue/10',
+  excluded_constant: 'border-orange/30 bg-orange/10',
+  excluded_all_null: 'border-pink/30 bg-pink/10',
+}
+
+const groupTextColors: Record<string, string> = {
+  top_separators: 'text-green',
+  review_high_missing: 'text-yellow',
+  standard_keep: 'text-blue',
+  excluded_constant: 'text-orange',
+  excluded_all_null: 'text-pink',
+}
+
 export default function DataQualityPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
+  const [highMissingOnly, setHighMissingOnly] = useState(false)
+  const [constantOnly, setConstantOnly] = useState(false)
 
   const filteredFeatures = useMemo(() => {
-    return FEATURE_MISSINGNESS.filter((feature) => {
+    return FEATURE_CATALOG.filter((feature) => {
       const matchesSearch = feature.feature.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesFilter =
-        activeFilter === 'all' ||
-        (activeFilter === 'keep' && feature.action === 'keep') ||
-        (activeFilter === 'review' && feature.action === 'review_high_missing') ||
-        (activeFilter === 'drop' &&
-          (feature.action === 'drop_constant' || feature.action === 'drop_all_null'))
-
-      return matchesSearch && matchesFilter
+      const matchesFilter = activeFilter === 'all' || feature.action === activeFilter
+      const matchesHighMissing = highMissingOnly ? feature.isHighMissing : true
+      const matchesConstant = constantOnly ? feature.isConstant : true
+      return matchesSearch && matchesFilter && matchesHighMissing && matchesConstant
     })
-  }, [activeFilter, searchQuery])
+  }, [activeFilter, searchQuery, highMissingOnly, constantOnly])
 
-  const topMissingFeatures = FEATURE_MISSINGNESS.slice(0, 20)
+  const topMissingFeatures = FEATURE_CATALOG
+    .slice()
+    .sort((a, b) => b.nullPct - a.nullPct)
+    .slice(0, 20)
+
+  const nullPctHistogram = useMemo(() => {
+    const bins = [
+      { label: '0%', count: 0 },
+      { label: '0-10%', count: 0 },
+      { label: '10-25%', count: 0 },
+      { label: '25-50%', count: 0 },
+      { label: '50-75%', count: 0 },
+      { label: '75-100%', count: 0 },
+    ]
+    FEATURE_CATALOG.forEach((f) => {
+      const p = f.nullPct
+      if (p === 0) bins[0].count += 1
+      else if (p <= 10) bins[1].count += 1
+      else if (p <= 25) bins[2].count += 1
+      else if (p <= 50) bins[3].count += 1
+      else if (p <= 75) bins[4].count += 1
+      else bins[5].count += 1
+    })
+    return bins
+  }, [])
 
   return (
     <div className="py-12">
@@ -65,7 +104,7 @@ export default function DataQualityPage() {
           <h1 className="text-4xl font-bold text-white mb-4">Data Quality</h1>
           <p className="text-white/60 max-w-2xl">
             Real mart outputs from the SECOM feature catalog, including label balance,
-            missingness ranking, and recommended feature actions.
+            missingness ranking, recommended feature actions, and priority review buckets.
           </p>
         </div>
 
@@ -210,6 +249,53 @@ export default function DataQualityPage() {
         </section>
 
         <section className="mb-16">
+          <h2 className="text-2xl font-bold text-white mb-6">Priority Review</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
+            {FEATURE_GROUPS.map((group: typeof FEATURE_GROUPS[number]) => (
+              <div
+                key={group.groupName}
+                className={`p-4 rounded-lg border ${groupColors[group.groupName] ?? 'border-comment/30 bg-comment/5'}`}
+              >
+                <div className={`text-sm font-medium mb-1 ${groupTextColors[group.groupName] ?? 'text-white'}`}>
+                  {group.groupName.replace(/_/g, ' ')}
+                </div>
+                <div className="text-2xl font-mono font-bold text-white mb-1">{group.count}</div>
+                <div className="text-xs text-comment truncate" title={group.features.slice(0, 5).join(', ')}>
+                  e.g. {group.features.slice(0, 5).join(', ') || '-'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-16">
+          <h2 className="text-2xl font-bold text-white mb-6">Missingness Distribution</h2>
+          <div className="bg-comment/5 rounded-lg p-6 border border-comment/30">
+            <div className="h-72">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={nullPctHistogram}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#797979" opacity={0.3} vertical={false} />
+                  <XAxis dataKey="label" tick={{ fill: '#d6d6d6', fontSize: 12 }} />
+                  <YAxis tick={{ fill: '#d6d6d6', fontSize: 12 }} />
+                  <Tooltip
+                    contentStyle={{
+                      background: '#2e2e2e',
+                      border: '1px solid #797979',
+                      borderRadius: '4px',
+                    }}
+                    formatter={(value: number) => [value, 'Features']}
+                  />
+                  <Bar dataKey="count" fill="#e5b567" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="text-center text-white/50 text-sm mt-4">
+              Null percentage distribution across all {FEATURE_CATALOG.length} features
+            </p>
+          </div>
+        </section>
+
+        <section className="mb-16">
           <h2 className="text-2xl font-bold text-white mb-6">Top 20 Most Missing Features</h2>
           <div className="bg-comment/5 rounded-lg p-6 border border-comment/30">
             <div className="h-80">
@@ -246,7 +332,7 @@ export default function DataQualityPage() {
         <section>
           <h2 className="text-2xl font-bold text-white mb-2">Full Feature Catalog</h2>
           <p className="text-white/50 text-sm mb-6">
-            This website now ships the full exported SECOM feature set, so all {FEATURE_MISSINGNESS.length} profiled features remain available for filtering and future visualizations.
+            This website now ships the full exported SECOM feature set, so all {FEATURE_CATALOG.length} profiled features remain available for filtering and future visualizations.
           </p>
 
           <div className="flex flex-wrap gap-4 mb-6">
@@ -260,82 +346,121 @@ export default function DataQualityPage() {
                 className="w-full pl-10 pr-4 py-2 bg-bg border border-comment/30 rounded-lg text-white placeholder:text-comment focus:border-yellow focus:outline-none"
               />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Filter className="w-4 h-4 text-comment" />
-              {(['all', 'keep', 'review', 'drop'] as FilterType[]).map((filter) => (
+              {(['all', 'keep', 'review_high_missing', 'drop_constant', 'drop_all_null'] as FilterType[]).map((filter) => (
                 <button
                   key={filter}
                   onClick={() => setActiveFilter(filter)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                     activeFilter === filter
                       ? 'bg-yellow text-bg'
                       : 'bg-comment/10 text-white/70 hover:text-white hover:bg-comment/20'
                   }`}
                 >
-                  {filter.charAt(0).toUpperCase() + filter.slice(1)}
+                  {filter === 'all' ? 'All' : FEATURE_ACTIONS[filter as FeatureActionKey]?.label ?? filter}
                 </button>
               ))}
             </div>
           </div>
 
-          <div className="bg-comment/5 rounded-lg border border-comment/30 overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-comment/30 bg-comment/10">
-                  <th className="px-4 py-3 text-left text-sm font-medium text-white/70">Feature</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-white/70">Null %</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-white/70">Distinct</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-white/70">Constant</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-white/70">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredFeatures.map((feature) => {
-                  const typedAction = feature.action as FeatureActionKey
-                  const Icon = actionIcons[typedAction]
-                  const label = FEATURE_ACTIONS[typedAction]?.label ?? typedAction
+          <div className="flex flex-wrap gap-4 mb-6">
+            <label className="inline-flex items-center gap-2 px-4 py-2 bg-comment/10 rounded-lg border border-comment/30 cursor-pointer hover:bg-comment/20 transition-colors">
+              <input
+                type="checkbox"
+                className="w-4 h-4 accent-yellow"
+                checked={highMissingOnly}
+                onChange={(e) => setHighMissingOnly(e.target.checked)}
+              />
+              <span className="text-sm text-white/80">High missingness only</span>
+            </label>
+            <label className="inline-flex items-center gap-2 px-4 py-2 bg-comment/10 rounded-lg border border-comment/30 cursor-pointer hover:bg-comment/20 transition-colors">
+              <input
+                type="checkbox"
+                className="w-4 h-4 accent-yellow"
+                checked={constantOnly}
+                onChange={(e) => setConstantOnly(e.target.checked)}
+              />
+              <span className="text-sm text-white/80">Constant only</span>
+            </label>
+          </div>
 
-                  return (
-                    <tr
-                      key={feature.feature}
-                      className="border-b border-comment/20 last:border-b-0 hover:bg-comment/5"
-                    >
-                      <td className="px-4 py-3 font-mono text-white text-sm">{feature.feature}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-16 h-2 bg-comment/30 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-yellow rounded-full"
-                              style={{ width: `${feature.nullPct}%` }}
-                            />
+          <div className="bg-comment/5 rounded-lg border border-comment/30 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[700px]">
+                <thead>
+                  <tr className="border-b border-comment/30 bg-comment/10">
+                    <th className="px-4 py-3 text-left text-sm font-medium text-white/70">Feature</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-white/70">Null %</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-white/70">Distinct</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-white/70">Mean</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-white/70">Stddev</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-white/70">Min</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-white/70">Max</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-white/70">Constant</th>
+                    <th className="px-4 py-3 text-left text-sm font-medium text-white/70">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredFeatures.map((feature) => {
+                    const typedAction = feature.action as FeatureActionKey
+                    const Icon = actionIcons[typedAction]
+                    const label = FEATURE_ACTIONS[typedAction]?.label ?? typedAction
+
+                    return (
+                      <tr
+                        key={feature.feature}
+                        className="border-b border-comment/20 last:border-b-0 hover:bg-comment/5"
+                      >
+                        <td className="px-4 py-3 font-mono text-white text-sm">{feature.feature}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 h-2 bg-comment/30 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-yellow rounded-full"
+                                style={{ width: `${feature.nullPct}%` }}
+                              />
+                            </div>
+                            <span className="text-white/70 text-sm">{feature.nullPct.toFixed(2)}%</span>
                           </div>
-                          <span className="text-white/70 text-sm">{feature.nullPct.toFixed(2)}%</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-white/70 text-sm">{feature.distinctCount}</td>
-                      <td className="px-4 py-3">
-                        {feature.isConstant ? (
-                          <span className="px-2 py-1 bg-pink/20 text-pink text-xs rounded">Yes</span>
-                        ) : (
-                          <span className="px-2 py-1 bg-green/20 text-green text-xs rounded">No</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${actionColors[typedAction]}`}
-                        >
-                          <Icon className="w-3 h-3" />
-                          {label}
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                        </td>
+                        <td className="px-4 py-3 text-white/70 text-sm">{feature.distinctCount}</td>
+                        <td className="px-4 py-3 text-white/70 text-sm">
+                          {feature.mean != null ? feature.mean.toFixed(2) : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-white/70 text-sm">
+                          {feature.stddev != null ? feature.stddev.toFixed(2) : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-white/70 text-sm">
+                          {feature.minValue != null ? feature.minValue.toFixed(2) : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-white/70 text-sm">
+                          {feature.maxValue != null ? feature.maxValue.toFixed(2) : '-'}
+                        </td>
+                        <td className="px-4 py-3">
+                          {feature.isConstant ? (
+                            <span className="px-2 py-1 bg-pink/20 text-pink text-xs rounded">Yes</span>
+                          ) : (
+                            <span className="px-2 py-1 bg-green/20 text-green text-xs rounded">No</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs ${actionColors[typedAction]}`}
+                          >
+                            <Icon className="w-3 h-3" />
+                            {label}
+                          </span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
           <div className="mt-4 text-sm text-comment">
-            Showing {filteredFeatures.length} of {FEATURE_MISSINGNESS.length} exported features
+            Showing {filteredFeatures.length} of {FEATURE_CATALOG.length} exported features
           </div>
         </section>
       </div>

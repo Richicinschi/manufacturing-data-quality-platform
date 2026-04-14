@@ -52,6 +52,10 @@ def main() -> None:
         "mart.label_distribution",
         "mart.feature_missingness",
         "mart.top_signal_fail_separation",
+        "mart.top_signal_profiles",
+        "mart.feature_failure_relationship",
+        "mart.daily_failure_rollup",
+        "mart.feature_priority_index",
         "mart.daily_yield_trend",
         "mart.feature_action_summary",
     ])

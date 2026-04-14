@@ -16,12 +16,16 @@ from pathlib import Path
 # Add repo root to path so `src.*` imports resolve
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from src.marts.daily_failure_rollup import build_daily_failure_rollup
 from src.marts.daily_yield_trend import build_daily_yield_trend
 from src.marts.feature_action_summary import build_feature_action_summary
+from src.marts.feature_failure_relationship import build_feature_failure_relationship
 from src.marts.feature_missingness import build_feature_missingness
+from src.marts.feature_priority_index import build_feature_priority_index
 from src.marts.label_distribution import build_label_distribution
 from src.marts.overview import build_secom_overview
 from src.marts.top_signal_fail_separation import build_top_signal_fail_separation
+from src.marts.top_signal_profiles import build_top_signal_profiles
 from src.etl.feature_catalog import build_feature_catalog
 
 
@@ -38,6 +42,51 @@ def export_to_json() -> Path:
     top_signals = build_top_signal_fail_separation()
     daily_trend = build_daily_yield_trend()
 
+    # New expanded exports
+    top_signal_profiles = build_top_signal_profiles(top_n=20)
+    feature_correlation_to_failure = build_feature_failure_relationship()
+
+    # feature_coverage_summary
+    total_rows = int(overview["entity_count"].iloc[0])
+    coverage_df = feature_catalog[[
+        "feature_name",
+        "null_pct",
+        "null_count",
+        "distinct_count",
+        "recommended_action",
+    ]].copy()
+    coverage_df["non_null_count"] = total_rows - coverage_df["null_count"]
+    feature_coverage_summary = coverage_df[[
+        "feature_name",
+        "null_pct",
+        "non_null_count",
+        "distinct_count",
+        "recommended_action",
+    ]].to_dict(orient="records")
+
+    daily_failure_summary = build_daily_failure_rollup()
+
+    # feature_groups
+    priority_index = build_feature_priority_index()
+    grouped = priority_index.groupby("priority_bucket")
+    feature_groups_buckets = []
+    for bucket_name, g in grouped:
+        features = g["feature_name"].tolist()
+        feature_groups_buckets.append({
+            "bucket_name": bucket_name,
+            "feature_count": len(features),
+            "features": features[:50],
+        })
+
+    keep_review_buckets = {"standard_keep", "review_high_missing", "top_separator"}
+    feature_groups = {
+        "buckets": feature_groups_buckets,
+        "top_separators": top_signal_profiles["feature_name"].unique().tolist()[:20],
+        "high_missing_count": int((priority_index["priority_bucket"] == "review_high_missing").sum()),
+        "constant_count": int((priority_index["priority_bucket"] == "excluded_constant").sum()),
+        "keep_review_priority_count": int(priority_index["priority_bucket"].isin(keep_review_buckets).sum()),
+    }
+
     output_dir = Path(__file__).parent.parent / "website" / "src" / "data" / "generated"
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -49,6 +98,11 @@ def export_to_json() -> Path:
         "action_summary": action_summary.to_dict(orient="records"),
         "top_signals": top_signals.to_dict(orient="records"),
         "daily_trend": daily_trend.to_dict(orient="records"),
+        "top_signal_profiles": top_signal_profiles.to_dict(orient="records"),
+        "feature_correlation_to_failure": feature_correlation_to_failure.to_dict(orient="records"),
+        "feature_coverage_summary": feature_coverage_summary,
+        "daily_failure_summary": daily_failure_summary.to_dict(orient="records"),
+        "feature_groups": feature_groups,
     }
 
     output_file = output_dir / "mart_data.json"
@@ -64,6 +118,11 @@ def export_to_json() -> Path:
     print(f"  - Fail: {data['overview']['fail_count']}")
     print(f"  - Top signals: {len(data['top_signals'])}")
     print(f"  - Daily records: {len(data['daily_trend'])}")
+    print(f"  - Top signal profiles: {len(data['top_signal_profiles'])}")
+    print(f"  - Feature correlation to failure: {len(data['feature_correlation_to_failure'])}")
+    print(f"  - Feature coverage summary: {len(data['feature_coverage_summary'])}")
+    print(f"  - Daily failure summary: {len(data['daily_failure_summary'])}")
+    print(f"  - Feature groups buckets: {len(data['feature_groups']['buckets'])}")
 
     return output_file
 

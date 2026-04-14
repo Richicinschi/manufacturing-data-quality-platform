@@ -11,6 +11,7 @@ import {
   Terminal,
   Github,
   ArrowRight,
+  FileJson,
 } from 'lucide-react'
 import type { ElementType } from 'react'
 import { REPO_URL, TECH_STACK, MART_TABLES } from '../data/generatedData'
@@ -54,6 +55,16 @@ def build_feature_catalog(df):
             'action': get_action(null_pct, is_constant)
         })
     return pd.DataFrame(records)`
+
+const jsonExportExample = `# Export warehouse marts to JSON for the website
+python scripts/generate_web_data.py
+
+# Outputs:
+# website/src/data/generated/mart_data.json
+# Includes: overview, label_distribution, feature_missingness,
+# feature_catalog, action_summary, top_signals, daily_trend,
+# feature_correlation_to_failure, top_signal_profiles,
+# daily_failure_summary, feature_coverage_summary, feature_groups`
 
 export default function TechnicalPage() {
   return (
@@ -156,7 +167,7 @@ export default function TechnicalPage() {
 
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-white mb-6">Code Examples</h2>
-          <div className="grid lg:grid-cols-2 gap-6">
+          <div className="grid lg:grid-cols-3 gap-6">
             <div className="bg-comment/5 rounded-lg border border-comment/30 overflow-hidden">
               <div className="flex items-center gap-3 px-4 py-3 bg-comment/10 border-b border-comment/30">
                 <Terminal className="w-4 h-4 text-yellow" />
@@ -177,6 +188,18 @@ export default function TechnicalPage() {
               <div className="p-4 overflow-x-auto">
                 <pre className="text-sm font-mono text-white/70">
                   <code>{pythonExample}</code>
+                </pre>
+              </div>
+            </div>
+
+            <div className="bg-comment/5 rounded-lg border border-comment/30 overflow-hidden">
+              <div className="flex items-center gap-3 px-4 py-3 bg-comment/10 border-b border-comment/30">
+                <FileJson className="w-4 h-4 text-blue" />
+                <span className="text-white font-medium">JSON Export</span>
+              </div>
+              <div className="p-4 overflow-x-auto">
+                <pre className="text-sm font-mono text-white/70">
+                  <code>{jsonExportExample}</code>
                 </pre>
               </div>
             </div>
@@ -237,12 +260,13 @@ export default function TechnicalPage() {
                 <div className="p-2 bg-yellow/20 rounded-lg">
                   <RefreshCw className="w-5 h-5 text-yellow" />
                 </div>
-                <h3 className="text-white font-medium">Rerunnable Pipeline</h3>
+                <h3 className="text-white font-medium">Rerunnable Local Workflow</h3>
               </div>
               <p className="text-white/60 text-sm">
-                The entire pipeline is idempotent and can be re-run from scratch.
-                All transformations are reproducible and tested against both
-                PostgreSQL and SQLite backends.
+                The entire pipeline is idempotent and can be re-run from scratch locally.
+                Python ETL builds raw, staging, and mart tables in PostgreSQL (or SQLite),
+                and <span className="font-mono text-yellow">scripts/generate_web_data.py</span> exports the mart layer to JSON for the
+                React multi-page site.
               </p>
             </div>
           </div>

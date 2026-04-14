@@ -125,6 +125,53 @@ export const DAILY_TREND = martData.daily_trend.map((row: any) => ({
   failRate: roundToTwo(row.fail_rate * 100),
 }))
 
+// New expanded mart exports
+export const TOP_SIGNAL_PROFILES = (martData.top_signal_profiles ?? []).map((row: any) => ({
+  feature: row.feature_name,
+  yieldClass: row.yield_class,
+  count: row.count,
+  missingCount: row.missing_count,
+  mean: roundToTwo(row.mean),
+  stddev: roundToTwo(row.stddev),
+  min: roundToTwo(row.min),
+  p25: roundToTwo(row.p25),
+  median: roundToTwo(row.median),
+  p75: roundToTwo(row.p75),
+  max: roundToTwo(row.max),
+}))
+
+export const FEATURE_CORRELATION_TO_FAILURE = (martData.feature_correlation_to_failure ?? []).map((row: any) => ({
+  feature: row.feature_name,
+  effectSize: roundToTwo(row.effect_size),
+  passMean: roundToTwo(row.pass_mean),
+  failMean: roundToTwo(row.fail_mean),
+  meanGap: roundToTwo(row.mean_gap),
+  validPassCount: row.valid_pass_count,
+  validFailCount: row.valid_fail_count,
+}))
+
+export const FEATURE_COVERAGE_SUMMARY = (martData.feature_coverage_summary ?? []).map((row: any) => ({
+  feature: row.feature_name,
+  nullPct: roundToTwo((row.null_pct ?? 0) * 100),
+  nonNullCount: row.non_null_count,
+  distinctCount: row.distinct_count,
+  action: row.recommended_action,
+}))
+
+export const DAILY_FAILURE_SUMMARY = (martData.daily_failure_summary ?? []).map((row: any) => ({
+  date: row.event_date,
+  entityCount: row.entity_count,
+  failCount: row.fail_count,
+  failRate: roundToTwo(row.fail_rate * 100),
+  rolling7dFailRate: roundToTwo(row.rolling_7d_fail_rate * 100),
+}))
+
+export const FEATURE_GROUPS = (martData.feature_groups?.buckets ?? []).map((row: any) => ({
+  groupName: row.bucket_name,
+  count: row.feature_count,
+  features: row.features ?? [],
+}))
+
 export const REPO_URL = "https://github.com/Richicinschi/manufacturing-data-quality-platform"
 
 export const PIPELINE_STAGES = [
@@ -173,17 +220,47 @@ export const MART_TABLES = [
     file: "src/marts/daily_yield_trend.py",
     columns: ["event_date", "entity_count", "pass_count", "fail_count", "pass_rate", "fail_rate"],
   },
+  {
+    name: "mart.feature_failure_relationship",
+    description: "All valid features ranked by effect size with pass/fail means",
+    file: "src/marts/feature_failure_relationship.py",
+    columns: ["feature_name", "effect_size", "pass_mean", "fail_mean", "mean_gap", "valid_pass_count", "valid_fail_count"],
+  },
+  {
+    name: "mart.top_signal_profiles",
+    description: "Per-class summary statistics for top 20 signals",
+    file: "src/marts/top_signal_profiles.py",
+    columns: ["feature_name", "yield_class", "count", "missing_count", "mean", "stddev", "min", "p25", "median", "p75", "max"],
+  },
+  {
+    name: "mart.daily_failure_rollup",
+    description: "Daily failure metrics with 7-day rolling fail rate",
+    file: "src/marts/daily_failure_rollup.py",
+    columns: ["event_date", "entity_count", "fail_count", "fail_rate", "rolling_7d_fail_rate"],
+  },
+  {
+    name: "mart.feature_coverage_summary",
+    description: "High-level coverage summary from the feature catalog",
+    file: "src/marts/feature_coverage_summary.py",
+    columns: ["metric", "count", "description"],
+  },
+  {
+    name: "mart.feature_groups",
+    description: "Feature buckets for priority review",
+    file: "src/marts/feature_groups.py",
+    columns: ["group_name", "count", "description", "example_features"],
+  },
 ]
 
 export const TECH_STACK = [
-  { name: "Python", description: "ETL pipeline with Pandas and NumPy", icon: "python" },
+  { name: "Python", description: "ETL pipeline with Pandas, NumPy and SQLAlchemy", icon: "python" },
   { name: "PostgreSQL", description: "Warehouse with raw, staging, and mart schemas", icon: "database" },
   { name: "SQLAlchemy", description: "Connection layer with SQLite fallback for tests", icon: "plug" },
   { name: "Feature Profiling", description: "Null analysis, distinct counts, and action flags", icon: "search" },
   { name: "Long-format Signals", description: "Entity-feature-value transformation", icon: "arrow-right-left" },
   { name: "Analytical Marts", description: "Reporting-friendly views for the website", icon: "bar-chart" },
   { name: "Pytest", description: "Validated warehouse and mart test suite", icon: "test-tube" },
-  { name: "React + TypeScript", description: "Multi-page website built with Vite", icon: "code" },
+  { name: "React + Vite", description: "Multi-page website with TypeScript, Tailwind and Recharts", icon: "code" },
 ]
 
 export const FEATURE_ACTIONS = Object.fromEntries(
