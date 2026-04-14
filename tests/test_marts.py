@@ -17,6 +17,8 @@ from src.marts.overview import build_secom_overview
 from src.marts.feature_missingness import build_feature_missingness
 from src.marts.label_distribution import build_label_distribution
 from src.marts.top_signal_fail_separation import build_top_signal_fail_separation
+from src.marts.daily_yield_trend import build_daily_yield_trend
+from src.marts.feature_action_summary import build_feature_action_summary
 
 
 @pytest.fixture(scope="session")
@@ -190,6 +192,41 @@ def test_top_signal_fail_separation_sorted_and_excludes_invalid(engine, source_s
     ]["feature_name"].tolist()
 
     assert not result["feature_name"].isin(invalid_features).any()
+
+
+def test_daily_yield_trend_reconciles_to_staging(engine, source_schema, db_connection_string):
+    trend = build_daily_yield_trend(
+        source_schema=source_schema,
+        source_table="secom_entities",
+        target_schema="mart",
+        target_table="daily_yield_trend_test",
+        connection_string=db_connection_string,
+    )
+
+    assert trend["entity_count"].sum() == 1567
+    assert ((trend["pass_count"] + trend["fail_count"]) == trend["entity_count"]).all()
+    assert ((trend["pass_rate"] + trend["fail_rate"]).round(10) == 1.0).all()
+
+
+def test_feature_action_summary_reconciles_to_catalog(engine, source_schema, db_connection_string):
+    summary = build_feature_action_summary(
+        source_schema=source_schema,
+        source_table="feature_catalog",
+        target_schema="mart",
+        target_table="feature_action_summary_test",
+        connection_string=db_connection_string,
+    )
+
+    expected_actions = {
+        "keep",
+        "review_high_missing",
+        "drop_constant",
+        "drop_all_null",
+    }
+
+    assert summary["feature_count"].sum() == 590
+    assert summary["feature_pct"].sum() == pytest.approx(1.0, abs=1e-9)
+    assert set(summary["recommended_action"]).issubset(expected_actions)
 
 
 if __name__ == "__main__":

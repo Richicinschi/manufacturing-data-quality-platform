@@ -8,6 +8,8 @@ _project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_project_root))
 
 from src.marts import (
+    build_daily_yield_trend,
+    build_feature_action_summary,
     build_feature_missingness,
     build_label_distribution,
     build_secom_overview,
@@ -31,6 +33,14 @@ def main() -> None:
     print("Building mart.top_signal_fail_separation...")
     build_top_signal_fail_separation()
     print("  Built mart.top_signal_fail_separation")
+
+    print("Building mart.daily_yield_trend...")
+    build_daily_yield_trend()
+    print("  Built mart.daily_yield_trend")
+
+    print("Building mart.feature_action_summary...")
+    build_feature_action_summary()
+    print("  Built mart.feature_action_summary")
 
     print("Mart build complete.")
 

@@ -52,6 +52,8 @@ def main() -> None:
         "mart.label_distribution",
         "mart.feature_missingness",
         "mart.top_signal_fail_separation",
+        "mart.daily_yield_trend",
+        "mart.feature_action_summary",
     ])
 
     print()
