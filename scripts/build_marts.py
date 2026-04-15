@@ -19,6 +19,12 @@ from src.marts import (
     build_secom_overview,
     build_top_signal_fail_separation,
     build_top_signal_profiles,
+    build_model_cv_results,
+    build_model_benchmark,
+    build_model_threshold_analysis,
+    build_final_model_test_results,
+    build_model_confusion_summary,
+    build_selected_signal_shortlist,
 )
 
 
@@ -66,6 +72,30 @@ def main() -> None:
     print("Building mart.feature_groups...")
     build_feature_groups()
     print("  Built mart.feature_groups")
+
+    print("Building mart.model_cv_results...")
+    build_model_cv_results()
+    print("  Built mart.model_cv_results")
+
+    print("Building mart.model_benchmark...")
+    build_model_benchmark()
+    print("  Built mart.model_benchmark")
+
+    print("Building mart.model_threshold_analysis...")
+    build_model_threshold_analysis()
+    print("  Built mart.model_threshold_analysis")
+
+    print("Building mart.final_model_test_results...")
+    build_final_model_test_results()
+    print("  Built mart.final_model_test_results")
+
+    print("Building mart.model_confusion_summary...")
+    build_model_confusion_summary()
+    print("  Built mart.model_confusion_summary")
+
+    print("Building mart.selected_signal_shortlist...")
+    build_selected_signal_shortlist()
+    print("  Built mart.selected_signal_shortlist")
 
     print("Mart build complete.")
 

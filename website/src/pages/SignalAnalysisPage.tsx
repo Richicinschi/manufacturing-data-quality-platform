@@ -8,7 +8,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { TrendingUp, CheckCircle, XCircle, Info, Search, ArrowUpDown } from 'lucide-react'
+import { TrendingUp, CheckCircle, XCircle, Info, Search, ArrowUpDown, Activity } from 'lucide-react'
 import { TOP_SIGNAL_PROFILES, FEATURE_CORRELATION_TO_FAILURE } from '../data/generatedData'
 
 function getEffectColor(effectSize: number) {
@@ -277,6 +277,19 @@ export default function SignalAnalysisPage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        <div className="mt-8 bg-blue/10 rounded-lg p-4 border border-blue/30">
+          <div className="flex items-start gap-3">
+            <Activity className="w-5 h-5 text-blue mt-0.5" />
+            <div>
+              <h3 className="text-white font-medium mb-1">From Signals to Selection</h3>
+              <p className="text-white/60 text-sm">
+                The modeling pipeline turns these effect-size rankings into a selected signal shortlist using walk-forward CV. See the final chosen features on the{' '}
+                <a href="#/modeling" className="text-yellow hover:underline">Modeling page</a>.
+              </p>
+            </div>
           </div>
         </div>
 

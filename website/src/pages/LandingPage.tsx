@@ -11,6 +11,7 @@ import {
   BarChart3,
   Code2,
   Github,
+  Brain,
 } from 'lucide-react'
 import {
   DATASET_METRICS,
@@ -298,6 +299,13 @@ export default function LandingPage() {
             >
               <Calendar className="w-5 h-5" />
               Time Trends
+            </Link>
+            <Link
+              to="/modeling"
+              className="inline-flex items-center gap-2 px-6 py-3 border border-comment text-white rounded-lg hover:border-yellow hover:text-yellow transition-colors"
+            >
+              <Brain className="w-5 h-5" />
+              Modeling
             </Link>
           </div>
         </div>

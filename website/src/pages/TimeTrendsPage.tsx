@@ -117,7 +117,7 @@ export default function TimeTrendsPage() {
           <Info className="w-5 h-5 text-yellow mt-0.5" />
           <div>
             <p className="text-white/80 text-sm">
-              The observed period spans <span className="font-mono text-white">{stats.totalDays} days</span> with a strong class imbalance: only <span className="font-mono text-white">{DATASET_METRICS.failPct}%</span> of entities failed. The rolling 7-day fail rate smooths daily noise and reflects the underlying imbalance without inventing operational causes.
+              The observed period spans <span className="font-mono text-white">{stats.totalDays} days</span> with a strong class imbalance: only <span className="font-mono text-white">{DATASET_METRICS.failPct}%</span> of entities failed. The rolling 7-day fail rate smooths daily noise and reflects the underlying imbalance without inventing operational causes. For modeling, the dataset is split chronologically: oldest 85% for development and newest 15% for final holdout evaluation.
             </p>
           </div>
         </div>

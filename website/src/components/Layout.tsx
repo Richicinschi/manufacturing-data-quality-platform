@@ -13,6 +13,7 @@ const navItems = [
   { path: '/data-quality', label: 'Data Quality' },
   { path: '/signal-analysis', label: 'Signal Analysis' },
   { path: '/time-trends', label: 'Time Trends' },
+  { path: '/modeling', label: 'Modeling' },
   { path: '/technical', label: 'Technical' },
 ]
 

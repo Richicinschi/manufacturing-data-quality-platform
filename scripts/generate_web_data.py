@@ -26,6 +26,12 @@ from src.marts.label_distribution import build_label_distribution
 from src.marts.overview import build_secom_overview
 from src.marts.top_signal_fail_separation import build_top_signal_fail_separation
 from src.marts.top_signal_profiles import build_top_signal_profiles
+from src.marts.model_cv_results import build_model_cv_results
+from src.marts.model_benchmark import build_model_benchmark
+from src.marts.model_threshold_analysis import build_model_threshold_analysis
+from src.marts.final_model_test_results import build_final_model_test_results
+from src.marts.model_confusion_summary import build_model_confusion_summary
+from src.marts.selected_signal_shortlist import build_selected_signal_shortlist
 from src.etl.feature_catalog import build_feature_catalog
 
 
@@ -66,6 +72,14 @@ def export_to_json() -> Path:
 
     daily_failure_summary = build_daily_failure_rollup()
 
+    # Modeling marts
+    model_cv_results = build_model_cv_results()
+    model_benchmark = build_model_benchmark()
+    model_threshold_analysis = build_model_threshold_analysis()
+    final_model_test_results = build_final_model_test_results()
+    model_confusion_summary = build_model_confusion_summary()
+    selected_signal_shortlist = build_selected_signal_shortlist()
+
     # feature_groups
     priority_index = build_feature_priority_index()
     grouped = priority_index.groupby("priority_bucket")
@@ -100,9 +114,14 @@ def export_to_json() -> Path:
         "daily_trend": daily_trend.to_dict(orient="records"),
         "top_signal_profiles": top_signal_profiles.to_dict(orient="records"),
         "feature_correlation_to_failure": feature_correlation_to_failure.to_dict(orient="records"),
-        "feature_coverage_summary": feature_coverage_summary,
         "daily_failure_summary": daily_failure_summary.to_dict(orient="records"),
         "feature_groups": feature_groups,
+        "model_cv_results": model_cv_results.to_dict(orient="records"),
+        "model_benchmark": model_benchmark.to_dict(orient="records"),
+        "model_threshold_analysis": model_threshold_analysis.to_dict(orient="records"),
+        "final_model_test_results": final_model_test_results.to_dict(orient="records"),
+        "model_confusion_summary": model_confusion_summary.to_dict(orient="records"),
+        "selected_signal_shortlist": selected_signal_shortlist.to_dict(orient="records"),
     }
 
     output_file = output_dir / "mart_data.json"
@@ -120,9 +139,14 @@ def export_to_json() -> Path:
     print(f"  - Daily records: {len(data['daily_trend'])}")
     print(f"  - Top signal profiles: {len(data['top_signal_profiles'])}")
     print(f"  - Feature correlation to failure: {len(data['feature_correlation_to_failure'])}")
-    print(f"  - Feature coverage summary: {len(data['feature_coverage_summary'])}")
     print(f"  - Daily failure summary: {len(data['daily_failure_summary'])}")
     print(f"  - Feature groups buckets: {len(data['feature_groups']['buckets'])}")
+    print(f"  - Model CV results: {len(data['model_cv_results'])}")
+    print(f"  - Model benchmark rows: {len(data['model_benchmark'])}")
+    print(f"  - Threshold analysis rows: {len(data['model_threshold_analysis'])}")
+    print(f"  - Final model test results: {len(data['final_model_test_results'])}")
+    print(f"  - Model confusion summary: {len(data['model_confusion_summary'])}")
+    print(f"  - Selected signal shortlist: {len(data['selected_signal_shortlist'])}")
 
     return output_file
 

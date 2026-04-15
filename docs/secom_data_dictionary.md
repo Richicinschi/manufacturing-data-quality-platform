@@ -22,6 +22,12 @@
 | `mart.feature_failure_relationship` | Failure relationship metrics for each valid feature | `feature_name`, `effect_size`, `pass_mean`, `fail_mean`, `mean_gap`, `valid_pass_count`, `valid_fail_count` |
 | `mart.daily_failure_rollup` | Daily failure metrics with 7-day rolling average | `event_date`, `entity_count`, `fail_count`, `fail_rate`, `rolling_7d_fail_rate` |
 | `mart.feature_priority_index` | Priority bucket assignment per feature for data-quality triage | `feature_name`, `priority_bucket`, `recommended_action`, `null_pct`, `is_constant`, `is_high_missing` |
+| `mart.model_cv_results` | Per-fold walk-forward CV results | `model`, `feature_set`, `fold`, `n_splits`, `n_features`, `pr_auc`, `roc_auc`, `precision`, `recall`, `f1` |
+| `mart.model_benchmark` | Aggregated CV benchmark by model and feature set | `model`, `feature_set`, `mean_pr_auc`, `std_pr_auc`, `mean_roc_auc`, `mean_f1`, `rank` |
+| `mart.model_threshold_analysis` | Threshold sweep with F1, precision, recall | `threshold`, `precision`, `recall`, `f1`, `selected` |
+| `mart.final_model_test_results` | Final holdout evaluation for the best model | `model`, `feature_set`, `n_features`, `threshold`, `test_pr_auc`, `test_roc_auc`, `test_precision`, `test_recall`, `test_f1` |
+| `mart.model_confusion_summary` | Confusion matrix for dev-OOF and test sets | `split`, `model`, `threshold`, `tn`, `fp`, `fn`, `tp` |
+| `mart.selected_signal_shortlist` | Signals in the winning feature set with metadata | `feature_name`, `effect_rank`, `effect_size`, `null_pct`, `recommended_action` |
 
 ## Exported JSON Keys (Website Contract)
 
@@ -34,11 +40,16 @@ The website consumes a single generated JSON bundle at `website/src/data/generat
 - `action_summary` — recommended action aggregates
 - `top_signals` — effect-size ranked signals
 - `daily_trend` — daily yield trend records
-- `top_signal_profiles` *(new)* — per-class statistics for top 20 signals
-- `feature_correlation_to_failure` *(new)* — failure relationship metrics per feature
-- `feature_coverage_summary` *(new)* — coverage-focused catalog view
-- `daily_failure_summary` *(new)* — daily failure rollup records
-- `feature_groups` *(new)* — features grouped by priority bucket
+- `top_signal_profiles` — per-class statistics for top 20 signals
+- `feature_correlation_to_failure` — failure relationship metrics per feature
+- `daily_failure_summary` — daily failure rollup records
+- `feature_groups` — features grouped by priority bucket
+- `model_cv_results` — per-fold CV metrics
+- `model_benchmark` — aggregated model benchmark
+- `model_threshold_analysis` — threshold sweep table
+- `final_model_test_results` — final holdout results
+- `model_confusion_summary` — confusion matrices
+- `selected_signal_shortlist` — winning feature set with metadata
 
 ## Recommended Action Values
 

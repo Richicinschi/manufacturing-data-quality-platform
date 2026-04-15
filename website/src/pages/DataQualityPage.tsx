@@ -201,7 +201,8 @@ export default function DataQualityPage() {
                   </div>
                   <p className="text-white/70 text-sm">
                     Failures represent only {DATASET_METRICS.failPct}% of entities, so any
-                    downstream modeling needs imbalance-aware evaluation.
+                    downstream modeling needs imbalance-aware evaluation. The modeling pipeline
+                    uses catalog actions to filter features before training.
                   </p>
                 </div>
               </div>

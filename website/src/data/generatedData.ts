@@ -150,14 +150,6 @@ export const FEATURE_CORRELATION_TO_FAILURE = (martData.feature_correlation_to_f
   validFailCount: row.valid_fail_count,
 }))
 
-export const FEATURE_COVERAGE_SUMMARY = (martData.feature_coverage_summary ?? []).map((row: any) => ({
-  feature: row.feature_name,
-  nullPct: roundToTwo((row.null_pct ?? 0) * 100),
-  nonNullCount: row.non_null_count,
-  distinctCount: row.distinct_count,
-  action: row.recommended_action,
-}))
-
 export const DAILY_FAILURE_SUMMARY = (martData.daily_failure_summary ?? []).map((row: any) => ({
   date: row.event_date,
   entityCount: row.entity_count,
@@ -182,6 +174,67 @@ export const PIPELINE_STAGES = [
   { name: "staging.signal_values_long", description: "Long-format signal transformation", schema: "staging", file: "src/etl/build_signals.py" },
   { name: "mart.*", description: "Analytical marts for reporting", schema: "mart", file: "src/marts/" },
 ]
+
+export const MODEL_CV_RESULTS = (martData.model_cv_results ?? []).map((row: any) => ({
+  model: row.model,
+  featureSet: row.feature_set,
+  fold: row.fold,
+  nSplits: row.n_splits,
+  nFeatures: row.n_features,
+  prAuc: roundToTwo(row.pr_auc),
+  rocAuc: roundToTwo(row.roc_auc),
+  precision: roundToTwo(row.precision),
+  recall: roundToTwo(row.recall),
+  f1: roundToTwo(row.f1),
+}))
+
+export const MODEL_BENCHMARK = (martData.model_benchmark ?? []).map((row: any) => ({
+  model: row.model,
+  featureSet: row.feature_set,
+  meanPrAuc: roundToTwo(row.mean_pr_auc),
+  stdPrAuc: roundToTwo(row.std_pr_auc),
+  meanRocAuc: roundToTwo(row.mean_roc_auc),
+  meanF1: roundToTwo(row.mean_f1),
+  rank: row.rank,
+}))
+
+export const MODEL_THRESHOLD_ANALYSIS = (martData.model_threshold_analysis ?? []).map((row: any) => ({
+  threshold: roundToTwo(row.threshold),
+  precision: roundToTwo(row.precision),
+  recall: roundToTwo(row.recall),
+  f1: roundToTwo(row.f1),
+  selected: row.selected,
+}))
+
+export const FINAL_MODEL_TEST_RESULTS = (martData.final_model_test_results ?? []).map((row: any) => ({
+  model: row.model,
+  featureSet: row.feature_set,
+  nFeatures: row.n_features,
+  threshold: roundToTwo(row.threshold),
+  prAuc: roundToTwo(row.test_pr_auc),
+  rocAuc: roundToTwo(row.test_roc_auc),
+  precision: roundToTwo(row.test_precision),
+  recall: roundToTwo(row.test_recall),
+  f1: roundToTwo(row.test_f1),
+}))[0]
+
+export const MODEL_CONFUSION_SUMMARY = (martData.model_confusion_summary ?? []).map((row: any) => ({
+  split: row.split,
+  model: row.model,
+  threshold: roundToTwo(row.threshold),
+  tn: row.tn,
+  fp: row.fp,
+  fn: row.fn,
+  tp: row.tp,
+}))
+
+export const SELECTED_SIGNAL_SHORTLIST = (martData.selected_signal_shortlist ?? []).map((row: any) => ({
+  feature: row.feature_name,
+  effectRank: row.effect_rank,
+  effectSize: roundToTwo(row.effect_size),
+  nullPct: roundToTwo(row.null_pct * 100),
+  action: row.recommended_action,
+}))
 
 export const MART_TABLES = [
   {
@@ -238,12 +291,47 @@ export const MART_TABLES = [
     file: "src/marts/daily_failure_rollup.py",
     columns: ["event_date", "entity_count", "fail_count", "fail_rate", "rolling_7d_fail_rate"],
   },
-
   {
     name: "mart.feature_groups",
     description: "Feature buckets for priority review",
     file: "src/marts/feature_groups.py",
     columns: ["group_name", "count", "description", "example_features"],
+  },
+  {
+    name: "mart.model_cv_results",
+    description: "Per-fold walk-forward CV results",
+    file: "src/marts/model_cv_results.py",
+    columns: ["model", "feature_set", "fold", "n_splits", "n_features", "pr_auc", "roc_auc", "precision", "recall", "f1"],
+  },
+  {
+    name: "mart.model_benchmark",
+    description: "Aggregated CV benchmark by model and feature set",
+    file: "src/marts/model_benchmark.py",
+    columns: ["model", "feature_set", "mean_pr_auc", "std_pr_auc", "mean_roc_auc", "mean_f1", "rank"],
+  },
+  {
+    name: "mart.model_threshold_analysis",
+    description: "Threshold sweep with F1, precision, recall",
+    file: "src/marts/model_threshold_analysis.py",
+    columns: ["threshold", "precision", "recall", "f1", "selected"],
+  },
+  {
+    name: "mart.final_model_test_results",
+    description: "Final holdout evaluation for the best model",
+    file: "src/marts/final_model_test_results.py",
+    columns: ["model", "feature_set", "n_features", "threshold", "test_pr_auc", "test_roc_auc", "test_precision", "test_recall", "test_f1"],
+  },
+  {
+    name: "mart.model_confusion_summary",
+    description: "Confusion matrix for dev-OOF and test sets",
+    file: "src/marts/model_confusion_summary.py",
+    columns: ["split", "model", "threshold", "tn", "fp", "fn", "tp"],
+  },
+  {
+    name: "mart.selected_signal_shortlist",
+    description: "Signals in the winning feature set with metadata",
+    file: "src/marts/selected_signal_shortlist.py",
+    columns: ["feature_name", "effect_rank", "effect_size", "null_pct", "recommended_action"],
   },
 ]
 

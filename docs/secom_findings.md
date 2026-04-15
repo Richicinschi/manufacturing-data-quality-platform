@@ -48,8 +48,9 @@ This repository demonstrates an end-to-end data-quality and analytics pipeline:
 
 ## What this project does not claim
 
-To keep scope focused on data engineering and quality, the project explicitly does **not** include:
+The project focuses on data engineering, quality, and reproducible analytics. Machine-learning model training has been added as a case-study layer; see [`docs/secom_modeling_findings.md`](secom_modeling_findings.md) for walk-forward CV results, benchmark metrics, and the selected signal shortlist. The project explicitly does **not** include:
 
 - Synthetic factory context or domain-specific sensor naming (the original features are anonymous)
-- Machine-learning model training, hyper-parameter tuning, or production deployment
+- Deep learning, XGBoost, or SHAP explainability
+- Real-time inference or production deployment
 - Causal inference beyond observational effect sizes; correlations are not proof of causation

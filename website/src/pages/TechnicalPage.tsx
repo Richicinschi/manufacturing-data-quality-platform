@@ -64,7 +64,10 @@ python scripts/generate_web_data.py
 # Includes: overview, label_distribution, feature_missingness,
 # feature_catalog, action_summary, top_signals, daily_trend,
 # feature_correlation_to_failure, top_signal_profiles,
-# daily_failure_summary, feature_coverage_summary, feature_groups`
+# daily_failure_summary, feature_groups,
+# model_cv_results, model_benchmark, model_threshold_analysis,
+# final_model_test_results, model_confusion_summary,
+# selected_signal_shortlist`
 
 export default function TechnicalPage() {
   return (
