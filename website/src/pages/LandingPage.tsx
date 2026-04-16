@@ -336,21 +336,21 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2 px-6 py-3 border border-comment text-white rounded-lg hover:border-yellow hover:text-yellow transition-colors"
             >
               <Activity className="w-5 h-5" />
-              Signal Analysis
+              Signal Separation
             </Link>
             <Link
               to="/time-trends"
               className="inline-flex items-center gap-2 px-6 py-3 border border-comment text-white rounded-lg hover:border-yellow hover:text-yellow transition-colors"
             >
               <Calendar className="w-5 h-5" />
-              Time Trends
+              Yield Timeline
             </Link>
             <Link
               to="/modeling"
               className="inline-flex items-center gap-2 px-6 py-3 border border-comment text-white rounded-lg hover:border-yellow hover:text-yellow transition-colors"
             >
               <Brain className="w-5 h-5" />
-              Modeling
+              Risk Modeling
             </Link>
           </div>
         </div>

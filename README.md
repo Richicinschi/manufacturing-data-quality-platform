@@ -1,118 +1,119 @@
-# manufacturing-data-quality-platform
+# SECOM Manufacturing Data Quality Platform
 
-A manufacturing data quality platform built around the UCI SECOM dataset, with a PostgreSQL warehouse, profiling pipeline, analytical marts, yield-failure detection modeling, and a multi-page React website.
+A semiconductor manufacturing analytics case study built on the UCI SECOM dataset. It demonstrates a complete data-engineering workflow: PostgreSQL warehouse with raw, staging, and mart layers; data-quality profiling and feature cataloging; rare-event modeling with walk-forward validation; and a multi-page React dashboard.
 
-## Current State
+![Dashboard tour](docs/assets/readme/secom-dashboard-tour.gif)
 
-- **SECOM dataset** loaded: `1,567` production entities with `590` measurement features from `secom.data`, with pass/fail labels stored separately
-- **PostgreSQL warehouse** running locally with `manufacturing_dw`
-- **Raw layer** available: `raw.secom_measurements`, `raw.secom_labels`, `raw.ingestion_log`
-- **Staging layer** available: `staging.secom_entities`, `staging.feature_catalog`, `staging.signal_values_long`
-- **Mart layer** available: overview, label distribution, feature missingness, action summary, top signals, daily yield trend, feature failure relationship, daily failure rollup, feature groups, and full modeling marts (CV results, benchmark, threshold analysis, cost curve, probability bins, feature importance, final test results, confusion summary, selected signal shortlist)
-- **Phase 3 modeling** added: anomaly detection baselines (Isolation Forest, LOF, Elliptic Envelope, One-Class SVM), new fold-local feature selectors (correlation pruning, mutual information, AUC gap, missingness indicators), inspection-rate metrics (recall@10%, precision@10%, lift@10%), and a random-split comparison script for public-notebook reference
-- **Website export** available through `scripts/generate_web_data.py`, which writes `website/src/data/generated/mart_data.json`
-- **Frontend** available as a multi-page React + TypeScript + Vite app in `website/`
-- **Modeling note:** The trained model is a benchmark under severe class imbalance (6.6% fail rate), not a production-ready classifier. The project's value is in the end-to-end pipeline, signal prioritization, and leakage-safe evaluation design.
-- **Default benchmark:** 8 enabled models × 12 feature sets = 96 model-feature configs, producing 384 walk-forward CV rows. `elliptic_envelope_pass_only` is registered but disabled by default.
-- **Final holdout metrics (random_forest + keep_only):** PR-AUC `0.1354`, ROC-AUC `0.6067`, precision `0.5000`, recall `0.0667`, F1 `0.1176`.
+| Signal Separation | Yield Timeline |
+|---|---|
+| ![Signal Separation](docs/assets/readme/secom-signal-separation.png) | ![Yield Timeline](docs/assets/readme/secom-yield-timeline.png) |
 
-## Quick Test
+## Project At A Glance
 
-```bash
-cd workspace/manufacturing-data-quality-platform
-export MDQP_DB_PASSWORD=postgres
-python -m pytest tests/ -v
+- **1,567** SECOM entities
+- **590** measurement features
+- **924,530** long-format signal rows
+- **104** fails, **6.64%** failure rate
+- Feature actions: **446** keep, **116** constant-drop, **28** high-missing review, **0** all-null
+- **474** ranked separator features
+- **96** model-feature configs, **384** walk-forward CV rows
+
+## Dashboard
+
+The frontend is a React + TypeScript + Vite app that reads generated warehouse marts as JSON. It includes:
+
+- **Home** — hero KPIs, pipeline architecture diagram, and key-findings flip cards
+- **Data Quality & Feature Catalog** — label distribution, missingness, and priority buckets
+- **Signal Separation** — top signals ranked by effect size with quartile drill-downs
+- **Yield Timeline** — daily pass/fail counts, failure-rate trends, and entity volume
+- **Risk Modeling** — walk-forward benchmark, anomaly baselines, inspection curves, and final holdout results
+- **Architecture** — stack overview, mart table reference, testing summary, and data contract
+
+## Architecture
+
+```
+Raw SECOM data
+    → PostgreSQL raw layer
+    → Staging ETL (cleaning, feature catalog, long-format signals)
+    → Analytical marts (overview, trends, separation, groups)
+    → Modeling pipeline (walk-forward CV, thresholding, feature selection)
+    → JSON export (mart_data.json + landing_summary.json)
+    → React website
 ```
 
-## Full Local Workflow
+- **Backend:** Python, Pandas, SQLAlchemy, PostgreSQL, scikit-learn
+- **Frontend:** React, TypeScript, Vite, Tailwind CSS, Recharts
+- **Tests:** 72 pytest tests covering warehouse transforms, marts, and modeling logic
 
-Run the full data pipeline, then the modeling pipeline, then generate the website data bundle, then build the frontend.
+## Modeling Results
+
+> **Important:** The trained model is a research benchmark under severe class imbalance, **not a production-ready classifier**. Its value is in the end-to-end pipeline design, leakage-safe evaluation, and signal prioritization.
+
+- **Final model:** `random_forest` + `keep_only`
+- **Holdout metrics:** PR-AUC `0.1354`, ROC-AUC `0.6067`, precision `0.5000`, recall `0.0667`, F1 `0.1176`
+- **Inspection policy (top-k):**
+  - Top 5% catches **2** failures
+  - Top 10% catches **2** failures
+  - Top 20% catches **6** failures
+
+The benchmark includes 8 enabled models × 12 feature sets = 96 configs, producing 384 walk-forward CV rows. Optional boosters (XGBoost, LightGBM) can be enabled via `pip install -e ".[modeling-boosters]"`.
+
+## Run Locally
 
 ```bash
+# 1. Install Python dependencies and set the DB password
 cd workspace/manufacturing-data-quality-platform
 export MDQP_DB_PASSWORD=postgres
+pip install -e .
+
+# 2. Run the full pipeline, modeling, and website export
 python scripts/run_full_pipeline.py
 python scripts/run_modeling_pipeline.py
-python scripts/run_public_notebook_comparison.py  # optional random-split reference
 python scripts/generate_web_data.py
+
+# 3. Build and preview the website
 cd website
-npm run build
-```
-
-Then install and run the website locally:
-
-```bash
-cd workspace/manufacturing-data-quality-platform/website
 npm install
-npm run dev
+npm run build
+npm run preview
 ```
 
-Vite will print a local URL such as `http://localhost:5173/`.
-
-The production assets will be written to `website/dist/`.
-
-## Optional Modeling Boosters
-
-The benchmark includes XGBoost and LightGBM as optional comparators. To enable them:
+### Quick Test
 
 ```bash
-cd workspace/manufacturing-data-quality-platform
-pip install -e ".[modeling-boosters]"
+python -m pytest tests/ -q
 ```
 
-If they are not installed, the pipeline skips them cleanly and records a skip reason in `mart.model_registry`.
+Expected: 72 passed.
 
-## Website Data Contract
+### Optional: README GIF rebuild
 
-The website reads one generated JSON bundle at:
-
-```text
-website/src/data/generated/mart_data.json
-```
-
-That file is built from the warehouse marts and currently contains:
-
-- `overview`
-- `label_distribution`
-- `feature_missingness`
-- `feature_catalog`
-- `action_summary`
-- `top_signals`
-- `daily_trend`
-- `top_signal_profiles`
-- `feature_correlation_to_failure`
-- `daily_failure_summary`
-- `feature_groups`
-- `model_registry`
-- `model_cv_results`
-- `model_benchmark`
-- `model_threshold_analysis`
-- `model_threshold_cost_curve`
-- `model_probability_bins`
-- `model_feature_importance`
-- `final_model_test_results`
-- `model_confusion_summary`
-- `selected_signal_shortlist`
-- `model_inspection_metrics`
-- `model_feature_selection_summary`
-- `anomaly_model_benchmark`
-- `final_model_inspection_curve`
-- `public_notebook_comparison` (empty if not run)
-
-If the generated JSON is missing, the website build should fail clearly rather than silently falling back to placeholder content.
-
-### Random-Split Comparison (Informational Only)
-
-A separate script produces a random 70/30 split benchmark for side-by-side comparison with public notebooks:
+If you update the source screenshots in `data/img/`, regenerate the README GIF:
 
 ```bash
-python scripts/run_public_notebook_comparison.py
+cd website
+npm run build:readme-gif
 ```
 
-This is explicitly labeled `evaluation_protocol="random_split_reference"` and is **not** used for final model selection. The primary benchmark remains the chronological walk-forward CV.
+## Data Contract
+
+The website reads generated data from the warehouse. Two files are produced:
+
+- `website/src/data/generated/mart_data.json` — full data bundle used by inner pages
+- `website/src/data/generated/landing_summary.json` — lightweight bundle used by the landing page to keep the initial chunk small
+
+The full bundle currently contains: overview, label distribution, feature missingness, feature catalog, action summary, top signals, daily trend, top signal profiles, feature correlation to failure, daily failure summary, feature groups, model registry, model CV results, model benchmark, model threshold analysis, model threshold cost curve, model probability bins, model feature importance, final model test results, model confusion summary, selected signal shortlist, model inspection metrics, model feature selection summary, anomaly model benchmark, final model inspection curve, and public notebook comparison.
+
+## Limitations
+
+- The SECOM dataset is small and highly imbalanced, so modeling performance is modest.
+- This project is a pipeline and dashboarding case study, not a deployed production system.
+- The React website is a static build; live data requires re-running the export script.
 
 ## Documentation
 
 - `docs/secom_findings.md` — analytical findings from the SECOM dataset
 - `docs/secom_modeling_findings.md` — modeling case study, model selection rationale, and scope boundaries
 - `docs/secom_data_dictionary.md` — warehouse and export data dictionary
+
+back to roasting beans

@@ -530,7 +530,7 @@ export const FEATURE_ACTIONS = Object.fromEntries(
 )
 
 export const KEY_FINDINGS = [
-  `The dataset contains ${DATASET_METRICS.entityCount.toLocaleString()} production entities with ${DATASET_METRICS.featureCount} measurement features.`,
+  `The dataset contains ${DATASET_METRICS.entityCount.toLocaleString()} SECOM entities with ${DATASET_METRICS.featureCount} measurement features.`,
   `Strong class imbalance: only ${DATASET_METRICS.failCount} failures (${DATASET_METRICS.failPct}%) out of ${DATASET_METRICS.entityCount.toLocaleString()} entities.`,
   `${reviewCount} features are flagged for high missingness review and ${constantCount} are constant-valued.`,
   "The strongest separating signals can be ranked reliably using univariate effect size (Cohen's d).",
