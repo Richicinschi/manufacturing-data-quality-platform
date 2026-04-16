@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { Database, Menu, X, Github } from 'lucide-react'
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { DATASET_METRICS, REPO_URL } from '../data/generatedData'
+import { DATASET_METRICS, REPO_URL } from '../data/adapters/common'
 
 interface LayoutProps {
   children: ReactNode
@@ -11,10 +11,10 @@ interface LayoutProps {
 const navItems = [
   { path: '/', label: 'Home' },
   { path: '/data-quality', label: 'Data Quality' },
-  { path: '/signal-analysis', label: 'Signal Analysis' },
-  { path: '/time-trends', label: 'Time Trends' },
-  { path: '/modeling', label: 'Modeling' },
-  { path: '/technical', label: 'Technical' },
+  { path: '/signal-analysis', label: 'Signal Separation' },
+  { path: '/time-trends', label: 'Yield Timeline' },
+  { path: '/modeling', label: 'Risk Modeling' },
+  { path: '/technical', label: 'Architecture' },
 ]
 
 export default function Layout({ children }: LayoutProps) {

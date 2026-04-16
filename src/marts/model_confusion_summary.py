@@ -26,7 +26,7 @@ def build_model_confusion_summary(
     best_model = results["best_info"]["model"]
     best_feature_set = results["best_info"]["feature_set"]
     threshold = results["threshold"]
-    oof_col = f"oof_prob_{best_model}_{best_feature_set}"
+    oof_col = f"oof_risk_{best_model}_{best_feature_set}"
     valid_oof = oof_df.dropna(subset=[oof_col])
     oof_preds = (valid_oof[oof_col] >= threshold).astype(int)
     cm_dev = confusion_matrix(valid_oof["y_true"], oof_preds)

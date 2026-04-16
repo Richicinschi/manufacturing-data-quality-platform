@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   BarChart,
   Bar,
@@ -9,7 +10,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import { TrendingUp, CheckCircle, XCircle, Info, Search, ArrowUpDown, Activity } from 'lucide-react'
-import { TOP_SIGNAL_PROFILES, FEATURE_CORRELATION_TO_FAILURE } from '../data/generatedData'
+import { TOP_SIGNAL_PROFILES, FEATURE_CORRELATION_TO_FAILURE } from '../data/adapters/signalAnalysis'
 
 function getEffectColor(effectSize: number) {
   if (effectSize >= 0.8) return 'text-green'
@@ -73,7 +74,7 @@ export default function SignalAnalysisPage() {
     return (
       <div className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold text-white mb-4">Signal Analysis</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">Signal Separation</h1>
           <p className="text-white/60">
             No signal separation data is available yet. Run the mart build and website export first.
           </p>
@@ -86,10 +87,9 @@ export default function SignalAnalysisPage() {
     <div className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">Signal Analysis</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">Signal Separation</h1>
           <p className="text-white/60 max-w-2xl">
-            All ranked features from the pass/fail separation mart, ordered by effect size (Cohen&apos;s d).
-            Higher effect sizes indicate stronger discriminative power.
+            All valid SECOM features ranked by univariate pass/fail separation using Cohen&apos;s d. This is diagnostic signal screening, not causal root-cause proof.
           </p>
         </div>
 
@@ -286,8 +286,8 @@ export default function SignalAnalysisPage() {
             <div>
               <h3 className="text-white font-medium mb-1">From Signals to Selection</h3>
               <p className="text-white/60 text-sm">
-                The modeling pipeline turns these effect-size rankings into a selected signal shortlist using walk-forward CV. See the final chosen features on the{' '}
-                <a href="#/modeling" className="text-yellow hover:underline">Modeling page</a>.
+                These effect-size rankings are used as diagnostic evidence alongside fold-safe feature-selection experiments. See the final model feature set and benchmark results on the{' '}
+                <Link to="/modeling" className="text-yellow hover:underline">Risk Modeling page</Link>.
               </p>
             </div>
           </div>

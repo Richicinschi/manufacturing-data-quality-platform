@@ -14,7 +14,8 @@ import {
   FileJson,
 } from 'lucide-react'
 import type { ElementType } from 'react'
-import { REPO_URL, TECH_STACK, MART_TABLES } from '../data/generatedData'
+import { REPO_URL } from '../data/adapters/common'
+import { TECH_STACK, MART_TABLES } from '../data/adapters/technical'
 
 const stackIcons: Record<string, ElementType> = {
   python: Code2,
@@ -61,6 +62,7 @@ python scripts/generate_web_data.py
 
 # Outputs:
 # website/src/data/generated/mart_data.json
+# website/src/data/generated/landing_summary.json
 # Includes: overview, label_distribution, feature_missingness,
 # feature_catalog, action_summary, top_signals, daily_trend,
 # feature_correlation_to_failure, top_signal_profiles,
@@ -74,10 +76,9 @@ export default function TechnicalPage() {
     <div className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">Technical Implementation</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">Technical Architecture</h1>
           <p className="text-white/60 max-w-2xl">
-            Overview of the engineering stack, pipeline architecture, and implementation details
-            of the SECOM data quality platform.
+            Implementation architecture for the SECOM warehouse, modeling pipeline, generated JSON data contract, React dashboard, and validation workflow.
           </p>
         </div>
 
@@ -251,12 +252,9 @@ export default function TechnicalPage() {
                 </div>
                 <h3 className="text-white font-medium">Pytest Suite</h3>
               </div>
-              <ul className="space-y-2 text-white/60 text-sm">
-                <li>- test_secom_join.py - Entity join validation</li>
-                <li>- test_feature_catalog.py - Catalog accuracy</li>
-                <li>- test_build_signals.py - Signal transformation</li>
-                <li>- test_marts.py - Mart table reconciliation</li>
-              </ul>
+              <p className="text-white/60 text-sm">
+                72 pytest tests covering raw/staging transforms, feature catalog logic, mart reconciliation, modeling feature selection, CV behavior, thresholding, anomaly scoring, artifact safety, and export compatibility.
+              </p>
             </div>
             <div className="p-6 bg-comment/5 rounded-lg border border-comment/30">
               <div className="flex items-center gap-3 mb-4">

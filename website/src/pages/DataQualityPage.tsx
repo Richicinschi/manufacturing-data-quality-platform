@@ -13,14 +13,14 @@ import {
   Cell,
 } from 'recharts'
 import { Search, Filter, AlertTriangle, CheckCircle, XCircle, Minus } from 'lucide-react'
+import { DATASET_METRICS } from '../data/adapters/common'
 import {
   ACTION_SUMMARY,
-  DATASET_METRICS,
   FEATURE_ACTIONS,
   FEATURE_CATALOG,
   FEATURE_GROUPS,
   LABEL_DISTRIBUTION,
-} from '../data/generatedData'
+} from '../data/adapters/dataQuality'
 
 type FilterType = 'all' | 'keep' | 'review_high_missing' | 'drop_constant' | 'drop_all_null'
 type FeatureActionKey = keyof typeof FEATURE_ACTIONS
@@ -114,10 +114,9 @@ export default function DataQualityPage() {
     <div className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">Data Quality</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">Data Quality & Feature Catalog</h1>
           <p className="text-white/60 max-w-2xl">
-            Real mart outputs from the SECOM feature catalog, including label balance,
-            missingness ranking, recommended feature actions, and priority review buckets.
+            Feature catalog and label-balance views built from real SECOM marts: pass/fail distribution, missingness, recommended feature actions, and priority review buckets.
           </p>
         </div>
 
@@ -258,12 +257,15 @@ export default function DataQualityPage() {
                   )
                 })}
               </div>
+              <p className="text-white/50 text-sm mt-4">
+                Drop (All Null) is kept in the legend for audit completeness; the current SECOM export has 0 all-null features.
+              </p>
             </div>
           </div>
         </section>
 
         <section className="mb-16">
-          <h2 className="text-2xl font-bold text-white mb-6">Priority Review</h2>
+          <h2 className="text-2xl font-bold text-white mb-6">Feature Priority Buckets</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-8">
             {FEATURE_GROUPS.map((group: typeof FEATURE_GROUPS[number]) => (
               <div

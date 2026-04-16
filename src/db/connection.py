@@ -6,6 +6,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from sqlalchemy import Engine, create_engine, text
 from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import NullPool
 
 # Load environment variables from .env if present
 load_dotenv(Path(".env"))
@@ -59,6 +60,10 @@ def get_engine(connection_string: str | None = None) -> Engine:
             If omitted, one is built from environment variables.
     """
     conn_str = connection_string or build_connection_string()
+    # Use NullPool for SQLite to avoid unclosed-connection ResourceWarnings in
+    # multiprocess contexts (e.g. sklearn/joblib parallel operations in tests).
+    if conn_str.startswith("sqlite"):
+        return create_engine(conn_str, poolclass=NullPool)
     return create_engine(conn_str, pool_pre_ping=True)
 
 

@@ -59,6 +59,21 @@ def main() -> None:
         "mart.daily_yield_trend",
         "mart.feature_action_summary",
         "mart.feature_groups",
+        "mart.model_cv_results",
+        "mart.model_benchmark",
+        "mart.model_threshold_analysis",
+        "mart.final_model_test_results",
+        "mart.model_confusion_summary",
+        "mart.selected_signal_shortlist",
+        "mart.model_registry",
+        "mart.model_feature_importance",
+        "mart.model_threshold_cost_curve",
+        "mart.model_probability_bins",
+        "mart.model_inspection_metrics",
+        "mart.model_feature_selection_summary",
+        "mart.anomaly_model_benchmark",
+        "mart.final_model_inspection_curve",
+        "mart.public_notebook_comparison",
     ])
 
     print()

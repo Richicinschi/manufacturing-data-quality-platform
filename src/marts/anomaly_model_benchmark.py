@@ -1,8 +1,6 @@
-"""Build the final_model_test_results mart."""
+"""Build the anomaly_model_benchmark mart."""
 
 from __future__ import annotations
-
-import json
 
 import pandas as pd
 from sqlalchemy import text
@@ -11,24 +9,18 @@ from src.db.connection import get_engine
 from src.modeling.pipeline_runner import get_pipeline_results
 
 
-def build_final_model_test_results(
+def build_anomaly_model_benchmark(
     target_schema: str = "mart",
-    target_table: str = "final_model_test_results",
+    target_table: str = "anomaly_model_benchmark",
     connection_string: str | None = None,
 ) -> pd.DataFrame:
-    """Build mart table of final holdout evaluation."""
+    """Build mart table of anomaly detector benchmark subset."""
     engine = get_engine(connection_string)
     dialect = engine.dialect.name
 
     results = get_pipeline_results(connection_string)
-    row = results["final_eval"]["results"]
-    df = pd.DataFrame([row])
-
-    if "test_probs" in df.columns:
-        df["test_probs"] = df["test_probs"].apply(lambda x: json.dumps(x.tolist() if hasattr(x, "tolist") else list(x)))
-
-    if "test_scores" in df.columns:
-        df["test_scores"] = df["test_scores"].apply(lambda x: json.dumps(x.tolist() if hasattr(x, "tolist") else list(x)))
+    df = results["benchmark"].copy()
+    df = df[df["model_kind"] == "anomaly_detector"].reset_index(drop=True)
 
     if dialect != "sqlite":
         with engine.connect() as conn:

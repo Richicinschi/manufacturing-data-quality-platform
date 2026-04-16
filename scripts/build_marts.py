@@ -25,6 +25,15 @@ from src.marts import (
     build_final_model_test_results,
     build_model_confusion_summary,
     build_selected_signal_shortlist,
+    build_model_registry,
+    build_model_feature_importance,
+    build_model_threshold_cost_curve,
+    build_model_probability_bins,
+    build_model_inspection_metrics,
+    build_model_feature_selection_summary,
+    build_anomaly_model_benchmark,
+    build_final_model_inspection_curve,
+    build_public_notebook_comparison,
 )
 
 
@@ -96,6 +105,42 @@ def main() -> None:
     print("Building mart.selected_signal_shortlist...")
     build_selected_signal_shortlist()
     print("  Built mart.selected_signal_shortlist")
+
+    print("Building mart.model_registry...")
+    build_model_registry()
+    print("  Built mart.model_registry")
+
+    print("Building mart.model_feature_importance...")
+    build_model_feature_importance()
+    print("  Built mart.model_feature_importance")
+
+    print("Building mart.model_threshold_cost_curve...")
+    build_model_threshold_cost_curve()
+    print("  Built mart.model_threshold_cost_curve")
+
+    print("Building mart.model_probability_bins...")
+    build_model_probability_bins()
+    print("  Built mart.model_probability_bins")
+
+    print("Building mart.model_inspection_metrics...")
+    build_model_inspection_metrics()
+    print("  Built mart.model_inspection_metrics")
+
+    print("Building mart.model_feature_selection_summary...")
+    build_model_feature_selection_summary()
+    print("  Built mart.model_feature_selection_summary")
+
+    print("Building mart.anomaly_model_benchmark...")
+    build_anomaly_model_benchmark()
+    print("  Built mart.anomaly_model_benchmark")
+
+    print("Building mart.final_model_inspection_curve...")
+    build_final_model_inspection_curve()
+    print("  Built mart.final_model_inspection_curve")
+
+    print("Building mart.public_notebook_comparison...")
+    build_public_notebook_comparison()
+    print("  Built mart.public_notebook_comparison")
 
     print("Mart build complete.")
 

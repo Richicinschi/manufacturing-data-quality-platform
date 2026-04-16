@@ -12,7 +12,8 @@ import {
   Line,
 } from 'recharts'
 import { Calendar, TrendingDown, Activity, Clock, Info } from 'lucide-react'
-import { DAILY_FAILURE_SUMMARY, DATASET_METRICS } from '../data/generatedData'
+import { DATASET_METRICS } from '../data/adapters/common'
+import { DAILY_FAILURE_SUMMARY } from '../data/adapters/timeTrends'
 
 export default function TimeTrendsPage() {
   const stats = useMemo(() => {
@@ -47,7 +48,7 @@ export default function TimeTrendsPage() {
     return (
       <div className="py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold text-white mb-4">Time Trends</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">Yield Timeline</h1>
           <p className="text-white/60">
             No daily yield trend data is available yet. Run the mart build and website export first.
           </p>
@@ -60,10 +61,9 @@ export default function TimeTrendsPage() {
     <div className="py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4">Time Trends</h1>
+          <h1 className="text-4xl font-bold text-white mb-4">Yield Timeline</h1>
           <p className="text-white/60 max-w-2xl">
-            Daily yield metrics and entity volume across the observed SECOM time range
-            from {DATASET_METRICS.dateRange.start} to {DATASET_METRICS.dateRange.end}.
+            Daily pass/fail counts, fail-rate movement, and entity volume across the observed SECOM timestamp range.
           </p>
         </div>
 
@@ -260,13 +260,13 @@ export default function TimeTrendsPage() {
 
         <div className="mt-12 grid md:grid-cols-3 gap-6">
           <div className="p-6 bg-green/10 rounded-lg border border-green/30">
-            <h3 className="text-green font-medium mb-2">Production Consistency</h3>
+            <h3 className="text-green font-medium mb-2">Observed Entity Volume</h3>
             <p className="text-white/60 text-sm">
-              The dataset averages {stats.avgDailyVolume} entities per observed day, giving the dashboard a stable daily volume baseline.
+              The dataset averages {stats.avgDailyVolume} entities per observed day. This describes the available SECOM sample volume, not a full factory throughput measurement.
             </p>
           </div>
           <div className="p-6 bg-yellow/10 rounded-lg border border-yellow/30">
-            <h3 className="text-yellow font-medium mb-2">Yield Stability</h3>
+            <h3 className="text-yellow font-medium mb-2">Failure-Rate Variation</h3>
             <p className="text-white/60 text-sm">
               The average fail rate is {stats.avgFailRate}%, which is directionally consistent with the overall dataset imbalance.
             </p>

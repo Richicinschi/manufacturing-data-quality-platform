@@ -1,8 +1,6 @@
-"""Build the final_model_test_results mart."""
+"""Build the final_model_inspection_curve mart."""
 
 from __future__ import annotations
-
-import json
 
 import pandas as pd
 from sqlalchemy import text
@@ -11,24 +9,21 @@ from src.db.connection import get_engine
 from src.modeling.pipeline_runner import get_pipeline_results
 
 
-def build_final_model_test_results(
+def build_final_model_inspection_curve(
     target_schema: str = "mart",
-    target_table: str = "final_model_test_results",
+    target_table: str = "final_model_inspection_curve",
     connection_string: str | None = None,
 ) -> pd.DataFrame:
-    """Build mart table of final holdout evaluation."""
+    """Build mart table of final model top-k inspection curve."""
     engine = get_engine(connection_string)
     dialect = engine.dialect.name
 
     results = get_pipeline_results(connection_string)
-    row = results["final_eval"]["results"]
-    df = pd.DataFrame([row])
+    df = results["inspection_curve"].copy()
 
-    if "test_probs" in df.columns:
-        df["test_probs"] = df["test_probs"].apply(lambda x: json.dumps(x.tolist() if hasattr(x, "tolist") else list(x)))
-
-    if "test_scores" in df.columns:
-        df["test_scores"] = df["test_scores"].apply(lambda x: json.dumps(x.tolist() if hasattr(x, "tolist") else list(x)))
+    best = results["best_info"]
+    df["model"] = best["model"]
+    df["feature_set"] = best["feature_set"]
 
     if dialect != "sqlite":
         with engine.connect() as conn:

@@ -18,6 +18,15 @@ from src.marts.model_threshold_analysis import build_model_threshold_analysis
 from src.marts.final_model_test_results import build_final_model_test_results
 from src.marts.model_confusion_summary import build_model_confusion_summary
 from src.marts.selected_signal_shortlist import build_selected_signal_shortlist
+from src.marts.model_registry import build_model_registry
+from src.marts.model_feature_importance import build_model_feature_importance
+from src.marts.model_threshold_cost_curve import build_model_threshold_cost_curve
+from src.marts.model_probability_bins import build_model_probability_bins
+from src.marts.model_inspection_metrics import build_model_inspection_metrics
+from src.marts.model_feature_selection_summary import build_model_feature_selection_summary
+from src.marts.anomaly_model_benchmark import build_anomaly_model_benchmark
+from src.marts.final_model_inspection_curve import build_final_model_inspection_curve
+from src.marts.public_notebook_comparison import build_public_notebook_comparison
 
 __all__ = [
     "build_daily_failure_rollup",
@@ -37,4 +46,13 @@ __all__ = [
     "build_final_model_test_results",
     "build_model_confusion_summary",
     "build_selected_signal_shortlist",
+    "build_model_registry",
+    "build_model_feature_importance",
+    "build_model_threshold_cost_curve",
+    "build_model_probability_bins",
+    "build_model_inspection_metrics",
+    "build_model_feature_selection_summary",
+    "build_anomaly_model_benchmark",
+    "build_final_model_inspection_curve",
+    "build_public_notebook_comparison",
 ]

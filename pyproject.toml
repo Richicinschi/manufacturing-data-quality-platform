@@ -18,6 +18,8 @@ dependencies = [
     "great-expectations>=0.18.0",
     "pytest>=7.4.0",
     "rich>=13.0.0",
+    "scikit-learn>=1.8.0",
+    "joblib>=1.3.0",
 ]
 
 [project.optional-dependencies]
@@ -26,6 +28,15 @@ dev = [
     "black>=23.0.0",
     "ruff>=0.1.0",
     "mypy>=1.5.0",
+]
+modeling-boosters = [
+    "xgboost>=3.0",
+    "lightgbm>=4.0",
+]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:unclosed database:ResourceWarning",
 ]
 
 [tool.setuptools.packages.find]

@@ -180,7 +180,8 @@ export const MODEL_CV_RESULTS = (martData.model_cv_results ?? []).map((row: any)
   featureSet: row.feature_set,
   fold: row.fold,
   nSplits: row.n_splits,
-  nFeatures: row.n_features,
+  nFeaturesRequested: row.n_features_requested,
+  nFeaturesUsed: row.n_features_used,
   prAuc: roundToTwo(row.pr_auc),
   rocAuc: roundToTwo(row.roc_auc),
   precision: roundToTwo(row.precision),
@@ -195,7 +196,56 @@ export const MODEL_BENCHMARK = (martData.model_benchmark ?? []).map((row: any) =
   stdPrAuc: roundToTwo(row.std_pr_auc),
   meanRocAuc: roundToTwo(row.mean_roc_auc),
   meanF1: roundToTwo(row.mean_f1),
+  meanPrecision: roundToTwo(row.mean_precision ?? 0),
+  meanRecall: roundToTwo(row.mean_recall ?? 0),
+  meanRecallAt10Pct: roundToTwo(row.mean_recall_at_10pct ?? 0),
+  meanPrecisionAt10Pct: roundToTwo(row.mean_precision_at_10pct ?? 0),
+  meanLiftAt10Pct: roundToTwo(row.mean_lift_at_10pct ?? 0),
   rank: row.rank,
+  modelFamily: row.model_family,
+  modelKind: row.model_kind ?? "classifier",
+  finalEligible: row.final_eligible,
+  enabled: row.enabled,
+  bestForInspectionPolicy: row.best_for_inspection_policy ?? false,
+}))
+
+const _md = martData as any
+
+export const MODEL_REGISTRY = (_md.model_registry ?? []).map((row: any) => ({
+  modelId: row.model_id,
+  modelFamily: row.model_family,
+  modelKind: row.model_kind ?? "classifier",
+  fitMode: row.fit_mode ?? "all_train",
+  scoreMethod: row.score_method ?? "predict_proba",
+  finalEligible: row.final_eligible,
+  enabled: row.enabled,
+  skipReason: row.skip_reason,
+}))
+
+export const MODEL_FEATURE_IMPORTANCE = (_md.model_feature_importance ?? []).map((row: any) => ({
+  featureName: row.feature_name,
+  importance: roundToTwo(row.importance),
+  importanceType: row.importance_type,
+}))
+
+export const MODEL_THRESHOLD_COST_CURVE = (_md.model_threshold_cost_curve ?? []).map((row: any) => ({
+  threshold: roundToTwo(row.threshold),
+  precision: roundToTwo(row.precision),
+  recall: roundToTwo(row.recall),
+  f1: roundToTwo(row.f1),
+  predictedFailCount: row.predicted_fail_count,
+  falsePositiveCount: row.false_positive_count,
+  falseNegativeCount: row.false_negative_count,
+  inspectionRate: roundToTwo(row.inspection_rate * 100),
+  selected: row.selected,
+}))
+
+export const MODEL_PROBABILITY_BINS = (_md.model_probability_bins ?? []).map((row: any) => ({
+  binMin: row.bin_min,
+  binMax: row.bin_max,
+  totalEntities: row.total_entities,
+  failCount: row.fail_count,
+  failRate: roundToTwo(row.fail_rate * 100),
 }))
 
 export const MODEL_THRESHOLD_ANALYSIS = (martData.model_threshold_analysis ?? []).map((row: any) => ({
@@ -234,6 +284,74 @@ export const SELECTED_SIGNAL_SHORTLIST = (martData.selected_signal_shortlist ?? 
   effectSize: roundToTwo(row.effect_size),
   nullPct: roundToTwo(row.null_pct * 100),
   action: row.recommended_action,
+}))
+
+export const INSPECTION_METRICS = (_md.inspection_metrics ?? {}) as {
+  recall_at_10pct?: number
+  precision_at_10pct?: number
+  lift_at_10pct?: number
+  captured_fails_at_10pct?: number
+}
+
+export const MODEL_INSPECTION_METRICS = (_md.model_inspection_metrics ?? []).map((row: any) => ({
+  model: row.model,
+  featureSet: row.feature_set,
+  modelFamily: row.model_family,
+  modelKind: row.model_kind ?? "classifier",
+  finalEligible: row.final_eligible,
+  enabled: row.enabled,
+  meanRecallAt05Pct: roundToTwo(row.mean_recall_at_05pct ?? 0),
+  meanPrecisionAt05Pct: roundToTwo(row.mean_precision_at_05pct ?? 0),
+  meanLiftAt05Pct: roundToTwo(row.mean_lift_at_05pct ?? 0),
+  meanRecallAt10Pct: roundToTwo(row.mean_recall_at_10pct ?? 0),
+  meanPrecisionAt10Pct: roundToTwo(row.mean_precision_at_10pct ?? 0),
+  meanLiftAt10Pct: roundToTwo(row.mean_lift_at_10pct ?? 0),
+  meanRecallAt20Pct: roundToTwo(row.mean_recall_at_20pct ?? 0),
+  meanPrecisionAt20Pct: roundToTwo(row.mean_precision_at_20pct ?? 0),
+  meanLiftAt20Pct: roundToTwo(row.mean_lift_at_20pct ?? 0),
+}))
+
+export const MODEL_FEATURE_SELECTION_SUMMARY = (_md.model_feature_selection_summary ?? []).map((row: any) => ({
+  model: row.model,
+  featureSet: row.feature_set,
+  meanNSelected: roundToTwo(row.mean_n_selected ?? 0),
+  minNSelected: row.min_n_selected ?? 0,
+  maxNSelected: row.max_n_selected ?? 0,
+  exampleFeatures: row.example_features ?? [],
+}))
+
+export const ANOMALY_MODEL_BENCHMARK = (_md.anomaly_model_benchmark ?? []).map((row: any) => ({
+  model: row.model,
+  featureSet: row.feature_set,
+  meanPrAuc: roundToTwo(row.mean_pr_auc ?? 0),
+  meanRecallAt10Pct: roundToTwo(row.mean_recall_at_10pct ?? 0),
+  meanPrecisionAt10Pct: roundToTwo(row.mean_precision_at_10pct ?? 0),
+  meanLiftAt10Pct: roundToTwo(row.mean_lift_at_10pct ?? 0),
+  rank: row.rank,
+  modelFamily: row.model_family,
+  finalEligible: row.final_eligible,
+  enabled: row.enabled,
+}))
+
+export const FINAL_MODEL_INSPECTION_CURVE = (_md.final_model_inspection_curve ?? []).map((row: any) => ({
+  inspectionRate: roundToTwo(row.inspection_rate ?? 0),
+  recall: roundToTwo(row.recall ?? 0),
+  precision: roundToTwo(row.precision ?? 0),
+  lift: roundToTwo(row.lift ?? 0),
+  capturedFails: row.captured_fails ?? 0,
+  model: row.model,
+  featureSet: row.feature_set,
+}))
+
+export const PUBLIC_NOTEBOOK_COMPARISON = (_md.public_notebook_comparison ?? []).map((row: any) => ({
+  model: row.model,
+  featureSet: row.feature_set,
+  evaluationProtocol: row.evaluation_protocol,
+  testPrAuc: roundToTwo(row.test_pr_auc ?? 0),
+  testRocAuc: roundToTwo(row.test_roc_auc ?? 0),
+  testPrecision: roundToTwo(row.test_precision ?? 0),
+  testRecall: roundToTwo(row.test_recall ?? 0),
+  testF1: roundToTwo(row.test_f1 ?? 0),
 }))
 
 export const MART_TABLES = [
@@ -332,6 +450,60 @@ export const MART_TABLES = [
     description: "Signals in the winning feature set with metadata",
     file: "src/marts/selected_signal_shortlist.py",
     columns: ["feature_name", "effect_rank", "effect_size", "null_pct", "recommended_action"],
+  },
+  {
+    name: "mart.model_registry",
+    description: "Registered models with eligibility and availability",
+    file: "src/marts/model_registry.py",
+    columns: ["model_id", "model_family", "final_eligible", "enabled", "skip_reason"],
+  },
+  {
+    name: "mart.model_feature_importance",
+    description: "Final-model feature importance",
+    file: "src/marts/model_feature_importance.py",
+    columns: ["feature_name", "importance", "importance_type"],
+  },
+  {
+    name: "mart.model_threshold_cost_curve",
+    description: "Threshold sweep with business-oriented cost metrics",
+    file: "src/marts/model_threshold_cost_curve.py",
+    columns: ["threshold", "precision", "recall", "f1", "predicted_fail_count", "false_positive_count", "false_negative_count", "inspection_rate", "selected"],
+  },
+  {
+    name: "mart.model_probability_bins",
+    description: "Final test probability bins with failure rates",
+    file: "src/marts/model_probability_bins.py",
+    columns: ["bin_min", "bin_max", "total_entities", "fail_count", "fail_rate"],
+  },
+  {
+    name: "mart.model_inspection_metrics",
+    description: "Mean CV inspection-rate metrics by model and feature set",
+    file: "src/marts/model_inspection_metrics.py",
+    columns: ["model", "feature_set", "mean_recall_at_05pct", "mean_precision_at_05pct", "mean_lift_at_05pct", "mean_recall_at_10pct", "mean_precision_at_10pct", "mean_lift_at_10pct", "mean_recall_at_20pct", "mean_precision_at_20pct", "mean_lift_at_20pct"],
+  },
+  {
+    name: "mart.model_feature_selection_summary",
+    description: "Per-fold feature selection counts and example features",
+    file: "src/marts/model_feature_selection_summary.py",
+    columns: ["model", "feature_set", "mean_n_selected", "min_n_selected", "max_n_selected", "example_features"],
+  },
+  {
+    name: "mart.anomaly_model_benchmark",
+    description: "Anomaly detector benchmark subset",
+    file: "src/marts/anomaly_model_benchmark.py",
+    columns: ["model", "feature_set", "mean_pr_auc", "mean_recall_at_10pct", "rank"],
+  },
+  {
+    name: "mart.final_model_inspection_curve",
+    description: "Final model top-k inspection curve",
+    file: "src/marts/final_model_inspection_curve.py",
+    columns: ["inspection_rate", "recall", "precision", "lift", "captured_fails", "model", "feature_set"],
+  },
+  {
+    name: "mart.public_notebook_comparison",
+    description: "Random-split reference results (informational only)",
+    file: "src/marts/public_notebook_comparison.py",
+    columns: ["model", "feature_set", "evaluation_protocol", "test_pr_auc", "test_recall"],
   },
 ]
 
